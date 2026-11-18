@@ -141,7 +141,7 @@ nav button{position:relative}nav .bdg{position:absolute;top:4px;left:calc(50% + 
 .paper .ph{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:3px double #1b1b1b;padding-bottom:8px;margin-bottom:12px}
 .paper .kp{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.paper .kp div{border:1px solid #ccc;border-radius:6px;padding:8px;text-align:center;display:flex;flex-direction:column}.paper .kp b{font:800 20px var(--serif)}
 .paper .ass{display:flex;gap:30px;margin-top:50px}.paper .ass div{flex:1;border-top:1px solid #1b1b1b;text-align:center;padding-top:4px;font-size:12px}
-.etq{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.lbl{border:1px dashed #999;border-radius:6px;padding:8px;text-align:center;display:flex;flex-direction:column;align-items:center;break-inside:avoid}.lbl .qr{width:90px;height:90px}.lbl .qr svg{width:100%;height:100%}.lbl b{font:800 15px var(--serif);margin-top:4px}.lbl small{font-size:9px;color:#666}
+.etq{display:grid;grid-template-columns:1fr 1fr}.lbl{border:1px dashed #999;padding:10px;display:flex;align-items:center;gap:10px;break-inside:avoid}.lbl .qr{width:58%;aspect-ratio:1}.lbl .qr svg{width:100%;height:100%;display:block}.lbl .tx{flex:1;text-align:center;display:flex;flex-direction:column;color:#000}.lbl .tx b{font:800 21px Helvetica,Arial,sans-serif;line-height:1.15}.lbl .tx span{font:800 14px Helvetica,Arial,sans-serif;margin-top:8px}.lbl small{font-size:8px;color:#666;margin-top:12px}@media print{@page{size:A4;margin:10mm}.etq .lbl{height:66mm;padding:3mm}}
 .sbox{width:100%;padding:11px 12px;border-radius:8px;border:1px solid var(--line);background:#141210;color:var(--ink);font:inherit;margin-bottom:10px}
 @media print{header,nav,.noprint,#modal,.toast,.fila{display:none!important}body{background:#fff!important}main,#view{padding:0!important;margin:0!important}.paper{border-radius:0;padding:0}.tog{display:none}}
 .mnav{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}.mnav button{background:none;border:1px solid var(--line);color:var(--acc);border-radius:6px;padding:6px 12px;font:inherit;font-size:16px}
@@ -700,13 +700,13 @@ const skuPorQR=v=>{v=String(v||'').trim().toUpperCase().replace(/^SKU[:\s]{0,3}/
 function scanBloco(v,arr,redesenha,pref){const x=skuPorQR(v);if(!x)return toast('Etiqueta não reconhecida: '+v);const k=x.modelo+'|'+x.tam;let i=arr.findIndex(b=>b.k===k);if(i<0){i=arr.findIndex(b=>!b.k);if(i<0){arr.push({k});i=arr.length-1}else arr[i].k=k}redesenha();toast(`${x.modelo} ${tamCurto(x.tam)} ${x.cor}`);setTimeout(()=>{const e=$('#'+pref+i+'_'+x.cor);if(e){e.focus();e.scrollIntoView({block:'center'})}},50)}
 let EQM='Todos';
 function vEtiquetas(){
-  const mods=['Todos',...new Set(ativos().map(x=>x.modelo))],L=ativos().filter(x=>EQM==='Todos'||x.modelo===EQM);
+  const base=D.estoque.filter(x=>x.ativo||x.estoque>0),mods=['Todos',...new Set(base.map(x=>x.modelo))],L=base.filter(x=>EQM==='Todos'||x.modelo===EQM);
   setTimeout(desenhaQRs,30);
   return `<div class="noprint"><div class="chips">${mods.map(m=>`<button class="${EQM===m?'on':''}" onclick="EQM='${m}';render()">${m}</button>`).join('')}</div>
   <button class="btn" style="margin:0 0 12px" onclick="window.print()">🖨 Imprimir / salvar PDF</button><p class="mut" style="font-size:12px">Cole a etiqueta no saco ou na prateleira. No app, o botão 📷 lê a etiqueta e já escolhe o modelo, o tamanho e a cor.</p></div>
-  <div class="paper etq">${L.map(x=>`<div class="lbl"><div class="qr" data-v="${esc(x.sku)}"></div><b>${esc(x.modelo)} ${tamCurto(x.tam)}</b><span>${esc(x.cor)}</span><small>${esc(x.sku)}</small></div>`).join('')}</div>`}
+  <div class="paper etq">${L.map(x=>`<div class="lbl"><div class="qr" data-v="${esc(x.sku)}"></div><div class="tx"><b>${esc(x.modelo)}</b><b>${tamCurto(x.tam)}</b><span>${esc(x.cor).toUpperCase()}</span><small>${esc(x.sku)}</small></div></div>`).join('')}</div>`}
 async function desenhaQRs(){const els=document.querySelectorAll('.qr[data-v]');if(!els.length)return;try{await carregaJS('https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js')}catch(e){return toast(e.message)}
-  els.forEach(e=>{const q=qrcode(0,'M');q.addData(e.dataset.v);q.make();e.innerHTML=q.createSvgTag({cellSize:3,margin:0,scalable:true})})}
+  els.forEach(e=>{const q=qrcode(0,'M');q.addData(e.dataset.v);q.make();e.innerHTML=q.createSvgTag({cellSize:4,margin:1,scalable:true})})}
 
 // ---------- RELATÓRIO (PDF) ----------
 let RP='mes';
