@@ -144,6 +144,12 @@ nav button{position:relative}nav .bdg{position:absolute;top:4px;left:calc(50% + 
 .etq{display:grid;grid-template-columns:1fr 1fr}.lbl{border:1px dashed #999;padding:10px;display:flex;align-items:center;gap:10px;break-inside:avoid}.lbl .qr{width:58%;aspect-ratio:1}.lbl .qr svg{width:100%;height:100%;display:block}.lbl .tx{flex:1;text-align:center;display:flex;flex-direction:column;color:#000}.lbl .tx b{font:800 21px Helvetica,Arial,sans-serif;line-height:1.15}.lbl .tx span{font:800 14px Helvetica,Arial,sans-serif;margin-top:8px}.lbl small{font-size:8px;color:#666;margin-top:12px}@media print{@page{size:A4;margin:10mm}.etq .lbl{height:66mm;padding:3mm}}
 .sbox{width:100%;padding:11px 12px;border-radius:8px;border:1px solid var(--line);background:#141210;color:var(--ink);font:inherit;margin-bottom:10px}
 @media print{header,nav,.noprint,#modal,.toast,.fila{display:none!important}body{background:#fff!important}main,#view{padding:0!important;margin:0!important}.paper{border-radius:0;padding:0}.tog{display:none}}
+.stt{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:14px}.stt button{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 4px;color:var(--mut);font:inherit;font-size:11px;text-transform:uppercase;letter-spacing:.5px}.stt b{display:block;font:800 22px var(--serif);margin-bottom:2px}
+.lin{display:flex;justify-content:space-between;align-items:center;width:100%;background:none;border:0;border-bottom:1px solid var(--line);padding:11px 2px;color:var(--ink);font:inherit;font-size:14px;text-align:left}.lin:last-child{border:0}
+.er{display:grid;grid-template-columns:78px repeat(4,minmax(0,1fr));align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}.er:last-child{border-bottom:0}.er.hd{padding:0 0 6px;border:0;font-size:10.5px;color:var(--mut);text-transform:uppercase;letter-spacing:1px;text-align:center}
+.en{font:800 15px var(--serif)}.ev{text-align:center;font-size:17px;font-weight:600}.ev.s-ZERADO,.ev.s-REPOR{color:#f07a55;font-weight:800}.ev.s-ATENCAO{color:var(--warn)}.ev.s-FORA{opacity:.45}
+.ib{background:var(--card);border:1px solid var(--line);border-radius:8px;color:var(--acc);font:inherit;font-size:16px;padding:0 12px;height:42px}
+.mg{display:grid;grid-template-columns:1fr 1fr;gap:10px}.mi{position:relative;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 8px 14px;text-align:center;color:var(--ink);font:inherit}.mi i{display:block;font-style:normal;font-size:24px;margin-bottom:6px}.mi b{font-size:13.5px;font-weight:600}.mi .bd{position:absolute;top:7px;right:8px;background:#b5432c;color:#fff;border-radius:9px;font-size:10.5px;padding:1px 6px;font-weight:700}
 .mnav{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}.mnav button{background:none;border:1px solid var(--line);color:var(--acc);border-radius:6px;padding:6px 12px;font:inherit;font-size:16px}
 </style>
 </head>
@@ -202,7 +208,7 @@ async function carregar(force){
   catch(e){if(/PIN/.test(e.message)){store('est_pin');store(CK());location.reload();return}toast(D?'Sem conexão — mostrando dados salvos':e.message)}
   finally{CARR=false;sync(false);loading(false);processaFila()}
 }
-function setD(d,doCache){D=d;if(!doCache)store(CK(),JSON.stringify(d));$('#sub').textContent=d.user.nome+' · '+d.atualizado+(d.painel&&d.painel.vendasAte?' · vendas até '+d.painel.vendasAte.replace(/^\W+/,''):'');render()}
+function setD(d,doCache){D=d;if(!doCache)store(CK(),JSON.stringify(d));$('#sub').textContent=d.user.nome+' · '+d.atualizado.slice(-5);render()}
 // fila de lançamentos: salva na hora no celular e envia por trás
 function fila(){try{return JSON.parse(getStore('est_fila')||'[]')}catch(e){return[]}}
 function setFila(f){store('est_fila',f.length?JSON.stringify(f):undefined)}
@@ -241,51 +247,34 @@ function sugerePiranha(){
 
 /* ---------- PAINEL ---------- */
 function vPainel(){
-  const A=ativos(),est=A.reduce((s,x)=>s+x.estoque,0),prod=A.reduce((s,x)=>s+x.producao,0),med=A.reduce((s,x)=>s+x.media,0),mes=D.estoque.reduce((s,x)=>s+x.mes,0);
-  const cob=med?est/med:0,dono=D.user.dono;
+  const A=ativos(),est=A.reduce((s,x)=>s+x.estoque,0),prod=A.reduce((s,x)=>s+x.producao,0),med=A.reduce((s,x)=>s+x.media,0),mes=D.estoque.reduce((s,x)=>s+x.mes,0),dono=D.user.dono;
+  const kp=(k,v,sub)=>`<div class="card"><div class="k">${k}</div><div class="mid">${v}</div>${sub?`<div class="mut" style="font-size:12px">${sub}</div>`:''}</div>`;
   const cnt=k=>A.filter(x=>stk(x.status)===k).length;
-  let h=`<div class="grid2"><div class="card"><div class="k">Peças em estoque</div><div class="big">${n0(est)}</div><div class="mut" style="font-size:12px">+ ${n0(prod)} em produção</div></div>
-  <div class="card"><div class="k">Cobertura geral</div><div class="big">${n0(cob)} <span style="font-size:16px">dias</span></div><div class="mut" style="font-size:12px">${n0(med)} peças/dia (15d)</div></div>
-  <div class="card"><div class="k">Vendas no mês</div><div class="mid">${n0(mes)}</div></div>
-  ${dono?`<div class="card"><div class="k">Valor em estoque</div><div class="mid">${brl(D.estoque.reduce((s,x)=>s+(x.valor||0),0))}</div></div>`:`<div class="card"><div class="k">SKUs ativos</div><div class="mid">${A.length}</div></div>`}</div>
-  <div class="card"><div class="grid2" style="grid-template-columns:repeat(4,1fr);text-align:center">
-  <div onclick="FS='ZERADO';ir('estoque')"><div class="k">Zerados</div><div class="mid" style="color:#f07a55">${cnt('ZERADO')}</div></div>
-  <div onclick="FS='REPOR';ir('estoque')"><div class="k">Repor já</div><div class="mid" style="color:#f07a55">${cnt('REPOR')}</div></div>
-  <div onclick="FS='ATENCAO';ir('estoque')"><div class="k">Atenção</div><div class="mid" style="color:var(--warn)">${cnt('ATENCAO')}</div></div>
-  <div onclick="FS='OK';ir('estoque')"><div class="k">OK</div><div class="mid" style="color:var(--ok)">${cnt('OK')}</div></div></div></div>`;
+  let h=`<div class="grid2">${kp('Em estoque',n0(est),'+'+n0(prod)+' na oficina')}${kp('Cobertura',n0(med?est/med:0)+' dias',n0(med)+' por dia')}${kp('Vendas no mês',n0(mes))}${dono?kp('Valor em estoque',brl(D.estoque.reduce((s,x)=>s+(x.valor||0),0))):kp('SKUs ativos',A.length)}</div>
+  <div class="stt">${[['ZERADO','Zerados','#f07a55'],['REPOR','Repor','#f07a55'],['ATENCAO','Atenção','var(--warn)'],['OK','OK','var(--ok)']].map(([k,t,c])=>`<button onclick="FS='${k==='OK'?'Todos':'FALTA'}';ir('estoque')"><b style="color:${c}">${cnt(k)}</b>${t}</button>`).join('')}</div>`;
   const urg=A.filter(x=>['ZERADO','REPOR','ATENCAO'].includes(stk(x.status))).sort((a,b)=>(a.dias??-1)-(b.dias??-1));
-  h+=`<div class="k" style="margin:14px 4px 6px">O que fazer agora</div>`;
-  if(!urg.length)h+='<p class="mut">Tudo OK. Nenhum SKU abaixo do limite.</p>';
-  urg.forEach(x=>{h+=`<button class="item" onclick="detSku('${x.sku}')"><div class="row sp"><b>${esc(x.modelo)} ${tamCurto(x.tam)} · <span class="dot" style="background:${COR_HEX[x.cor]||'#888'}"></span> ${esc(x.cor)}</b><span class="pill st-${stk(x.status)}">${esc(x.status)}</span></div>
-  <div class="row sp mut" style="font-size:13px;margin-top:3px"><span>${n0(x.estoque)} em estoque · ${n0(x.producao)} na oficina · ${x.dias==null?'—':n0(x.dias)+' dias'}</span><span>${x.sugestao?'<b style="color:var(--acc)">produzir '+n0(x.sugestao)+'</b>':''}</span></div>
-  ${x.comecar?`<div class="mut" style="font-size:12px">Começar produção até <b style="color:var(--ink)">${dbr(x.comecar)}</b></div>`:''}</button>`});
-  const pir=D.estoque.filter(x=>x.piranha),cfg=D.config||{};
-  let prox='';if(cfg.ultimaPiranha&&cfg.cicloPiranha){const d=new Date(cfg.ultimaPiranha+'T12:00');d.setDate(d.getDate()+cfg.cicloPiranha);prox=String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')}
-  h+=`<div class="card" style="margin-top:14px"><div class="row sp"><div class="k">🐟 Piranhas atuais</div>${prox?`<span class="pill">troca ${prox}</span>`:''}</div><div style="margin-top:6px">${pir.map(x=>`<div class="row sp" style="font-size:14px;margin:4px 0"><span>${esc(x.modelo)} ${tamCurto(x.tam)} ${esc(x.cor)}</span><span class="mut">${n0(x.estoque)} est. · ${n1(x.media)}/dia</span></div>`).join('')||'<span class="mut">Nenhuma marcada</span>'}</div>
-  <div class="k" style="margin-top:12px">Sugestão para a próxima troca</div><div class="mut" style="font-size:12px">Mais estoque e menos venda, um por modelo/tamanho</div>${sugerePiranha().map(x=>`<div class="row sp" style="font-size:14px;margin:4px 0"><span>${esc(x.modelo)} ${tamCurto(x.tam)} ${esc(x.cor)}</span><span class="mut">${n0(x.estoque)} est. · ${n1(x.media)}/dia</span></div>`).join('')}</div>`;
+  h+=`<div class="card"><div class="row sp"><div class="k">O que fazer agora</div>${urg.length>5?`<button class="tog" style="min-width:0;padding:4px 9px" onclick="ir('alertas')">Ver todos (${urg.length})</button>`:''}</div>`;
+  h+=urg.length?urg.slice(0,5).map(x=>`<button class="lin" onclick="detSku('${x.sku}')"><span><b>${esc(x.modelo)} ${tamCurto(x.tam)}</b> ${esc(x.cor)}</span><span>${x.sugestao?`<span class="mut" style="font-size:12px">produzir ${n0(x.sugestao)}</span> `:''}<span class="pill st-${stk(x.status)}">${n0(x.estoque)}</span></span></button>`).join(''):'<p class="mut" style="margin:6px 0 0">Tudo OK.</p>';
+  h+='</div>';
+  const pir=D.estoque.filter(x=>x.piranha),cfg=D.config||{};let prox='';if(cfg.ultimaPiranha&&cfg.cicloPiranha)prox=dbr(addDias(cfg.ultimaPiranha,cfg.cicloPiranha));
+  h+=`<button class="lin" style="border:1px solid var(--line);border-radius:10px;padding:12px;background:var(--card)" onclick="detPiranha()"><span>🐟 <b>Piranha</b> <span class="mut">${pir.length?pir.map(x=>esc(x.modelo)+' '+tamCurto(x.tam)+' '+esc(x.cor)).join(', '):'nenhuma'}</span></span><span class="mut" style="font-size:12px;white-space:nowrap">${prox?'troca '+prox:''} ›</span></button>`;
   return h;
 }
+function detPiranha(){const pir=D.estoque.filter(x=>x.piranha);
+  open_(`<h2>🐟 Piranha</h2><div class="k">Atuais</div>${pir.map(x=>`<div class="row sp" style="font-size:14px;margin:6px 0"><span>${esc(x.modelo)} ${tamCurto(x.tam)} ${esc(x.cor)}</span><span class="mut">${n0(x.estoque)} est. · ${n1(x.media)}/dia</span></div>`).join('')||'<p class="mut">Nenhuma marcada</p>'}
+  <div class="k" style="margin-top:14px">Sugestão para a próxima troca</div>${sugerePiranha().map(x=>`<div class="row sp" style="font-size:14px;margin:6px 0"><span>${esc(x.modelo)} ${tamCurto(x.tam)} ${esc(x.cor)}</span><span class="mut">${n0(x.estoque)} est. · ${n1(x.media)}/dia</span></div>`).join('')}`)}
 
 /* ---------- ESTOQUE ---------- */
 function vEstoque(){
-  const mods=['Todos',...new Set(D.estoque.map(x=>x.modelo))];
-  return `<div class="row" style="gap:8px"><input class="sbox" placeholder="🔎 Buscar: malta azul, R3, preto…" value="${esc(Q)}" oninput="buscaQ(this.value)"><button class="tog" style="min-width:0;margin-bottom:10px;padding:10px 12px" onclick="lerQR(v=>{const x=skuPorQR(v);x?detSku(x.sku):toast('Etiqueta não reconhecida')})">📷</button></div>
-  <div class="chips">${mods.map(m=>`<button class="${FM===m?'on':''}" onclick="FM='${m}';render()">${m}</button>`).join('')}</div>
-  <div class="chips">${[['Todos','Todos'],['ZERADO','Zerados'],['REPOR','Repor já'],['ATENCAO','Atenção'],['OK','OK'],['FORA','Fora de linha']].map(s=>`<button class="${FS===s[0]?'on':''}" onclick="FS='${s[0]}';render()">${s[1]}</button>`).join('')}</div>
-  <div id="elist">${listaEstoque()}</div>
-  <button class="btn sec" style="margin-top:6px" onclick="fAjuste()">± Ajuste de estoque (contagem, defeito, devolução)</button>`;
+  const nf=ativos().filter(x=>['ZERADO','REPOR','ATENCAO'].includes(stk(x.status))).length;
+  return `<div class="row" style="gap:6px;margin-bottom:10px"><input class="sbox" style="margin:0;flex:1" placeholder="Buscar" value="${esc(Q)}" oninput="buscaQ(this.value)"><button class="ib" aria-label="Ler etiqueta" onclick="lerQR(v=>{const x=skuPorQR(v);x?detSku(x.sku):toast('Etiqueta não reconhecida')})">📷</button><button class="ib" aria-label="Ajuste" onclick="fAjuste()">±</button></div>
+  <div class="chips"><button class="${FS!=='FALTA'?'on':''}" onclick="FS='Todos';render()">Tudo</button><button class="${FS==='FALTA'?'on':''}" onclick="FS='FALTA';render()">Faltando ${nf}</button></div>
+  <div class="card" style="padding:10px 12px" id="elist">${listaEstoque()}</div>`;
 }
 function listaEstoque(){
-  let l=filtraQ(D.estoque.filter(x=>(FM==='Todos'||x.modelo===FM)&&(FS==='Todos'||stk(x.status)===FS)));
-  let h=`<div class="hdcores"><span style="text-align:left">Modelo</span>${CORES.map(c=>`<span><span class="dot" style="background:${COR_HEX[c]}"></span> ${c}</span>`).join('')}</div>`;
-  grupos(l).forEach(g=>{
-    h+=`<div class="skurow"><div class="nm"><b>${esc(g.modelo)}</b><span class="mut" style="font-size:12px">${esc(g.tam)}</span></div>`;
-    CORES.forEach(c=>{const x=g.itens[c];h+=x?`<div class="cel ${stk(x.status)}" onclick="detSku('${x.sku}')"><b>${n0(x.estoque)}</b><span class="mut">${x.dias==null?'—':n0(x.dias)+'d'}</span>${x.producao?`<div class="pz">+${n0(x.producao)}</div>`:''}${x.piranha?'<div class="pz">🐟</div>':''}</div>`:'<div class="cel" style="opacity:.25">—</div>'});
-    h+='</div>';
-  });
-  if(!l.length)h+='<p class="mut">Nada nesse filtro.</p>';
-  h+=`<p class="mut" style="font-size:12px">Número grande = estoque pronto · "d" = dias até acabar · "+" = na oficina · 🐟 = Piranha</p>`;
-  return h;
+  const l=filtraQ(D.estoque.filter(x=>(x.ativo||x.estoque>0)&&(FS!=='FALTA'||['ZERADO','REPOR','ATENCAO'].includes(stk(x.status)))));
+  if(!l.length)return '<p class="mut" style="margin:4px 0">Nada encontrado.</p>';
+  return `<div class="er hd"><span></span>${CORES.map(c=>`<span>${c}</span>`).join('')}</div>`+grupos(l).map(g=>`<div class="er"><span class="en">${esc(g.modelo)} ${tamCurto(g.tam)}</span>${CORES.map(c=>{const x=g.itens[c];return x?`<span class="ev s-${stk(x.status)}" onclick="detSku('${x.sku}')">${n0(x.estoque)}</span>`:'<span class="ev mut">–</span>'}).join('')}</div>`).join('');
 }
 function detSku(sku){
   const x=D.estoque.find(s=>s.sku===sku);if(!x)return;
@@ -307,6 +296,7 @@ function detSku(sku){
 }
 
 /* ---------- PRODUÇÃO ---------- */
+let PX={};
 function vProducao(){
   const P=D.producao,dono=D.user.dono;
   let h=P.resumo?`<div class="card"><b style="font-family:var(--serif)">${esc(P.resumo)}</b></div>`:'';
@@ -316,12 +306,12 @@ function vProducao(){
     h+=`<div class="card ${l.pend?'pend':''}"><div class="row sp"><b style="font:800 22px var(--serif);color:var(--acc)">${esc(l.lote)}</b><span class="pill ${/conclu|ok|✅/i.test(l.situacao)?'ok':'pe'}">${esc(l.situacao||'—')}</span></div>
     <div class="mut" style="font-size:13px">Corte ${dbr(l.data)} · risco ${n1(l.risco)} m${l.mkg?' · '+n1(l.mkg)+' m/kg':''}</div>
     <div class="prog"><i style="width:${pct}%"></i></div>
-    <div class="row sp" style="font-size:13px"><span>${n0(ch)} de ${n0(l.totalCortadas)} peças chegaram</span><b style="color:${l.falta?'var(--warn)':'var(--ok)'}">falta ${n0(l.falta)}</b></div>
+    <div class="row sp" style="font-size:13px"><span>${n0(ch)} de ${n0(l.totalCortadas)} peças chegaram</span><b style="color:${l.falta?'var(--warn)':'var(--ok)'}">falta ${n0(l.falta)}</b></div>${PX[l.lote]?`
     <table style="margin-top:8px"><tr><th></th>${CORES.map(c=>`<th><span class="dot" style="background:${COR_HEX[c]}"></span></th>`).join('')}</tr>
     <tr><td>Rolos</td>${CORES.map(c=>`<td>${n0(l.rolos[c])}</td>`).join('')}</tr>
     <tr><td>Folhas</td>${CORES.map(c=>`<td>${n0(l.folhas[c])}</td>`).join('')}</tr>
     <tr><td>Cortadas</td>${CORES.map(c=>`<td>${n0(l.cortadas[c])}</td>`).join('')}</tr></table>
-    <div class="mut" style="font-size:12px;margin-top:6px">Encaixe: ${Object.entries(l.encaixe).map(([k,v])=>v+'× '+k).join(' · ')||'—'}${dono&&l.custoPeca?' · custo/peça '+brl(l.custoPeca):''}</div></div>`;
+    <div class="mut" style="font-size:12px;margin-top:6px">Encaixe: ${Object.entries(l.encaixe).map(([k,v])=>v+'× '+k).join(' · ')||'—'}${dono&&l.custoPeca?' · custo/peça '+brl(l.custoPeca):''}</div>`:''}<button class="tog" style="margin-top:10px" onclick="PX['${l.lote}']=!PX['${l.lote}'];render()">${PX[l.lote]?'Menos':'Detalhes'}</button></div>`;
   });
   if(!P.lotes.length)h+='<p class="mut">Nenhum lote lançado.</p>';
   if((P.falta||[]).length){
@@ -364,7 +354,7 @@ function vEntregas(){
     h+=`<div class="card"><div class="row sp"><b style="font:800 17px var(--serif)">${dbr(d)}</b><span><b>${n0(tb)}</b> boas${td?` · <span style="color:var(--bad)">${n0(td)} defeito</span>`:''}${dono?' · '+brl(L.reduce((s,e)=>s+(e.valor||0),0)):''}</span></div>
     <table style="margin-top:6px">${L.map(e=>`<tr class="${e.pend?'pend':''}" ${e.pend||!e.linha?'':`onclick="eEntrega(${e.linha})"`}><td>${esc(e.modelo)} ${tamCurto(e.tam)} <span class="dot" style="background:${COR_HEX[e.cor]||'#888'}"></span> ${esc(e.cor)}${e.lote?' <span class="mut">'+esc(e.lote)+'</span>':''}</td><td>${n0(e.boas)}${e.defeito?` <span style="color:var(--bad)">+${e.defeito}d</span>`:''}</td><td class="mut" style="font-size:11px">${esc(e.oficina)}</td></tr>`).join('')}</table></div>`;
   });
-  if(!E.length)h+='<p class="mut">Nenhuma entrega lançada.</p>';else h+='<p class="mut" style="font-size:12px">Toque numa linha para corrigir ou apagar.</p>';
+  if(!E.length)h+='<p class="mut">Nenhuma entrega lançada.</p>';
   return h;
 }
 let BL=[];
@@ -403,21 +393,10 @@ function sEntrega(){
 
 // ---------- MAIS ----------
 function vMais(){
-  const A=alertas(),urg=A.filter(a=>a.n>=3).length;
-  const it=(t,ic,tit,sub,extra)=>`<button class="menu" onclick="ir('${t}')"><div class="row sp"><span><b>${ic} ${tit}</b><div class="mut" style="font-size:12.5px;margin-top:3px">${sub}</div></span><span style="color:var(--acc);font-size:20px">${extra||'›'}</span></div></button>`;
-  const v=vendasPer(15);
-  let h=it('alertas','⚠','Alertas',A.length?`${A.length} aviso${A.length>1?'s':''}${urg?` · ${urg} urgente${urg>1?'s':''}`:''}`:'Nada pendente',urg?`<span class="pill st-ZERADO">${urg}</span>`:'');
-  h+=it('vendas','📈','Vendas',`${n0(v.tot)} peças em 15 dias · ${n0(v.tot/15)}/dia`);
-  h+=it('resumo','🗓','Resumo do mês',nomeMes(hoje().slice(0,7)));
-  const pr=planoCorte().rolos;
-  h+=it('planejar','✂','Planejar corte e previsão',pr?`Sugestão: ${pr} rolos para cobrir ${PA} dias`:'Nada urgente para cortar');
-  h+=it('oficinas','🏭','Ranking das oficinas','Peças, defeito, prazo e custo');
-  if(D.tecido)h+=it('tecido','🧵','Estoque de tecido',`${n0(D.tecido.totalRolos)} rolos · lançar chegada`);
-  h+=it('relatorio','📄','Relatório em PDF','Semana ou mês, pronto para enviar');
-  h+=it('etiquetas','🏷','Etiquetas QR','Imprimir etiquetas para ler com a câmera');
-  if(D.user.dono){h+=it('usuarios','👥','Pessoas e PINs',`${(D.usuarios||[]).length} pessoa(s)`);h+=it('historico','🕘','Histórico',`Quem lançou o quê`)}
-  if(D.user.dono&&D.pagamento){const ab=pagAberto();h+=it('pagamento','💰','Pagamento das oficinas',ab?`${brl(ab)} em aberto`:'Tudo pago')}
-  h+=`<button class="menu" onclick="if(confirm('Sair deste celular?')){store('est_pin');store(CK());location.reload()}"><b style="font-size:15px">Sair</b><div class="mut" style="font-size:12.5px">Trocar de PIN</div></button>`;
+  const A=alertas(),urg=A.filter(a=>a.n>=3).length,dono=D.user.dono,ab=dono&&D.pagamento?pagAberto():0;
+  const it=(t,ic,nome,bd)=>`<button class="mi" onclick="ir('${t}')">${bd?`<span class="bd">${bd}</span>`:''}<i>${ic}</i><b>${nome}</b></button>`;
+  let h='<div class="mg">'+it('alertas','⚠️','Alertas',urg)+it('vendas','📈','Vendas')+it('resumo','🗓','Resumo do mês')+it('planejar','✂️','Planejar corte')+it('oficinas','🏭','Oficinas')+(D.tecido?it('tecido','🧵','Tecido'):'')+(dono&&D.pagamento?it('pagamento','💰','Pagamento',ab?'R$':''):'')+it('relatorio','📄','Relatório PDF')+it('etiquetas','🏷','Etiquetas QR')+(dono?it('usuarios','👥','Pessoas e PINs')+it('historico','🕘','Histórico'):'')+
+  `<button class="mi" onclick="if(confirm('Sair deste celular?')){store('est_pin');store(CK());location.reload()}"><i>🚪</i><b>Sair</b></button></div>`;
   return h;
 }
 const MESES=['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
@@ -520,7 +499,7 @@ let PAGX={};
 function vPagamento(){
   if(!D.user.dono||!D.pagamento)return '<p class="mut">Sem acesso.</p>';
   const ab=pagAberto(),H=hoje();
-  let h=`<div class="card"><div class="k">Em aberto (todas as semanas)</div><div class="big" style="color:${ab?'#f07a55':'var(--ok)'}">${brl(ab)}</div><div class="mut" style="font-size:12px">Toque em "Pago" quando pagar a oficina. Grava direto na aba PAGAMENTO.</div></div>`;
+  let h=`<div class="card"><div class="k">Em aberto (todas as semanas)</div><div class="big" style="color:${ab?'#f07a55':'var(--ok)'}">${brl(ab)}</div></div>`;
   D.pagamento.forEach((b,i)=>{
     const fim=fimSemana(b),fechada=/fechad/i.test(b.situacao),atual=b.inicio&&b.inicio<=H&&fim>=H;
     h+=`<div class="card"><div class="row sp"><span><b style="font:800 18px var(--serif)">${esc(b.periodo)}</b><div class="mut" style="font-size:12px">${esc(b.mes)} · ${b.entregas.length} entrega${b.entregas.length===1?'':'s'}${atual?' · semana atual':''}</div></span><span class="pill ${fechada?'ok':'pe'}">${esc((b.situacao||'').replace(/^[^\wÀ-ú]+/,''))||'—'}</span></div>
@@ -615,8 +594,7 @@ function vPlanejar(){
 function previsao(){
   let h='';
   const L=ativos().filter(x=>x.media>0).map(x=>({x,d:x.media?Math.floor((x.estoque+x.producao)/x.media):999,dp:x.media?Math.floor(x.estoque/x.media):999})).sort((a,b)=>a.dp-b.dp);
-  h+=`<div class="k" style="margin:16px 4px 6px">Previsão — quando cada SKU acaba</div><div class="card">${L.map(({x,d,dp})=>`<div class="row sp" style="font-size:13.5px;margin:6px 0" onclick="detSku('${x.sku}')"><span><span class="dot" style="background:${COR_HEX[x.cor]||'#888'}"></span> ${esc(x.modelo)} ${tamCurto(x.tam)} ${esc(x.cor)}</span><span style="text-align:right"><b style="color:${dp<=7?'#f07a55':dp<=15?'var(--warn)':'var(--ink)'}">${dp>=999?'—':dbr(addDias(hoje(),dp))}</b> <span class="mut">(${dp}d)</span>${x.producao?`<div class="mut" style="font-size:11px">com oficina: ${dbr(addDias(hoje(),d))}</div>`:''}</span></div>`).join('')}</div>
-  <p class="mut" style="font-size:12px">Data em que o estoque pronto acaba no ritmo dos últimos 15 dias. "Com oficina" soma o que ainda vai chegar.</p>`;
+  h+=`<div class="k" style="margin:16px 4px 6px">Previsão — quando cada SKU acaba</div><div class="card">${L.map(({x,d,dp})=>`<div class="row sp" style="font-size:13.5px;margin:6px 0" onclick="detSku('${x.sku}')"><span><span class="dot" style="background:${COR_HEX[x.cor]||'#888'}"></span> ${esc(x.modelo)} ${tamCurto(x.tam)} ${esc(x.cor)}</span><span style="text-align:right"><b style="color:${dp<=7?'#f07a55':dp<=15?'var(--warn)':'var(--ink)'}">${dp>=999?'—':dbr(addDias(hoje(),dp))}</b> <span class="mut">(${dp}d)</span>${x.producao?`<div class="mut" style="font-size:11px">com oficina: ${dbr(addDias(hoje(),d))}</div>`:''}</span></div>`).join('')}</div>`;
   return h;
 }
 
@@ -638,7 +616,6 @@ function vOficinas(){
     <div><div class="k">Prazo médio</div><div class="mid">${o.pzq?n0(o.pz/o.pzq)+'d':'—'}</div></div>
     ${dono?`<div><div class="k">Custo/pç</div><div class="mid" style="font-size:17px">${o.boas?brl(o.val/o.boas):'—'}</div></div>`:''}</div>
     <div class="mut" style="font-size:12px;margin-top:6px">${Object.entries(o.mods).sort((a,b)=>b[1]-a[1]).map(([m,q])=>esc(m)+' '+n0(q)).join(' · ')}</div></div>`});
-  h+=`<p class="mut" style="font-size:12px">Prazo médio = dias entre o corte do lote e a entrega, pesado pelas peças.</p>`;
   return h;
 }
 
@@ -668,8 +645,7 @@ function sTecido(){const rol=num(val('trol'));if(!rol)return toast('Informe os r
 
 // ---------- USUÁRIOS + HISTÓRICO (dono) ----------
 function vUsuarios(){if(!D.user.dono)return '<p class="mut">Sem acesso.</p>';
-  return `<button class="btn" style="margin:0 0 12px" onclick="fUsuario()">+ Nova pessoa</button>`+(D.usuarios||[]).map(u=>`<div class="card"><div class="row sp"><span><b style="font:800 17px var(--serif)">${esc(u.nome)}</b><div class="mut" style="font-size:12px">${u.perfil==='dono'?'Dono — vê tudo':'Equipe — sem custos e pagamentos'}</div></span><span><button class="tog" onclick="this.textContent='${esc(u.pin)}'">PIN ••••</button> <button class="tog" style="min-width:0" onclick="fUsuario(${u.linha})">Editar</button></span></div></div>`).join('')+
-  `<p class="mut" style="font-size:12px">Cada pessoa com o próprio PIN: o histórico mostra quem lançou o quê.</p>`}
+  return `<button class="btn" style="margin:0 0 12px" onclick="fUsuario()">+ Nova pessoa</button>`+(D.usuarios||[]).map(u=>`<div class="card"><div class="row sp"><span><b style="font:800 17px var(--serif)">${esc(u.nome)}</b><div class="mut" style="font-size:12px">${u.perfil==='dono'?'Dono — vê tudo':'Equipe — sem custos e pagamentos'}</div></span><span><button class="tog" onclick="this.textContent='${esc(u.pin)}'">PIN ••••</button> <button class="tog" style="min-width:0" onclick="fUsuario(${u.linha})">Editar</button></span></div></div>`).join('')}
 function fUsuario(linha){const u=(D.usuarios||[]).find(x=>x.linha===linha)||{nome:'',pin:'',perfil:'equipe'};
   open_(`<h2>${linha?'Editar':'Nova'} pessoa</h2><label>Nome</label><input id="un" value="${esc(u.nome)}"><label>PIN (4 a 8 números)</label><input id="up" inputmode="numeric" value="${esc(u.pin)}">
   <label>Perfil</label><select id="upf"><option value="equipe" ${u.perfil!=='dono'?'selected':''}>Equipe</option><option value="dono" ${u.perfil==='dono'?'selected':''}>Dono</option></select>
