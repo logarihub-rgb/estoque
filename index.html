@@ -409,7 +409,7 @@ function vMais(){
   let h=it('alertas','⚠','Alertas',A.length?`${A.length} aviso${A.length>1?'s':''}${urg?` · ${urg} urgente${urg>1?'s':''}`:''}`:'Nada pendente',urg?`<span class="pill st-ZERADO">${urg}</span>`:'');
   h+=it('vendas','📈','Vendas',`${n0(v.tot)} peças em 15 dias · ${n0(v.tot/15)}/dia`);
   h+=it('resumo','🗓','Resumo do mês',nomeMes(hoje().slice(0,7)));
-  const pc=planoCorte(),pr=pc.out.reduce((s,f)=>s+f.rolos,0);
+  const pr=planoCorte().rolos;
   h+=it('planejar','✂','Planejar corte e previsão',pr?`Sugestão: ${pr} rolos para cobrir ${PA} dias`:'Nada urgente para cortar');
   h+=it('oficinas','🏭','Ranking das oficinas','Peças, defeito, prazo e custo');
   if(D.tecido)h+=it('tecido','🧵','Estoque de tecido',`${n0(D.tecido.totalRolos)} rolos · lançar chegada`);
@@ -597,24 +597,23 @@ function encaixeFam(){const o={};D.producao.lotes.slice().reverse().forEach(l=>O
 function tecidoDe(cor){const t=D.tecido;if(!t)return null;const m=(t.comprar||[]).find(x=>norm(x.peca)===norm(cor));const nome=m?m.tecido:cor;return {nome,rolos:(t.saldo||{})[nome]??null}}
 function planoCorte(){
   const need=x=>Math.max(0,Math.round(x.media*PA-x.estoque-x.producao));
-  const EF=encaixeFam(),F=fpr(),out=[];
-  Object.entries(EF).forEach(([fam,{lote,enc}])=>{
-    const cores=CORES.map(c=>{let folhas=0;const pecas={};Object.entries(enc).forEach(([k,n])=>{const tam=k.split(' ')[1];const x=ativos().find(s=>s.modelo.toLowerCase()===fam.toLowerCase()&&tamCurto(s.tam)===tam&&s.cor===c);const nd=x?need(x):0;pecas[k]={need:nd};folhas=Math.max(folhas,Math.ceil(nd/n))});
-      Object.entries(enc).forEach(([k,n])=>pecas[k].faz=folhas*n);return{cor:c,folhas,rolos:Math.ceil(folhas/F),pecas}});
-    out.push({fam,lote,enc,cores,rolos:cores.reduce((s,c)=>s+c.rolos,0)});
-  });
-  const sem=ativos().filter(x=>!EF[x.modelo.split(' ')[0]]&&!Object.keys(EF).some(f=>f.toLowerCase()===x.modelo.toLowerCase())&&need(x)>0).map(x=>({x,n:need(x)}));
-  return{out,sem,F};
+  let pc=0,rl=0;D.producao.lotes.forEach(l=>{const r=CORES.reduce((s,c)=>s+(l.rolos[c]||0),0);if(r&&l.totalCortadas){pc+=l.totalCortadas;rl+=r}});const ppr=rl?pc/rl:120;
+  const g={};ativos().forEach(x=>{const n=need(x);if(!n)return;const k=x.modelo+' '+tamCurto(x.tam);(g[k]=g[k]||{nome:k,cores:{}}).cores[x.cor]=n});
+  const cores=CORES.map(c=>{const n=Object.values(g).reduce((s,o)=>s+(o.cores[c]||0),0);return{cor:c,need:n,rolos:Math.ceil(n/ppr),tec:tecidoDe(c)}});
+  return{grid:Object.values(g),cores,ppr,rolos:cores.reduce((s,c)=>s+c.rolos,0)};
 }
 function vPlanejar(){
   let h=`<div class="chips"><span class="mut" style="font-size:12px;align-self:center">Cobrir</span>${[20,30,45,60].map(n=>`<button class="${PA===n?'on':''}" onclick="PA=${n};render()">${n} dias</button>`).join('')}</div>`;
-  const P=planoCorte(),tot=P.out.reduce((s,f)=>s+f.rolos,0);
-  h+=`<div class="card"><div class="k">Plano de corte sugerido</div><div class="mut" style="font-size:12px">Para ter estoque para ${PA} dias, contando o que já está na oficina. Usa o último encaixe de cada modelo e ${n1(P.F)} folhas por rolo.</div><div class="big" style="margin-top:6px">${n0(tot)} <span style="font-size:16px">rolos</span></div></div>`;
-  P.out.forEach(f=>{const pr=f.cores.filter(c=>c.folhas);
-    h+=`<div class="card"><div class="row sp"><b style="font:800 19px var(--serif)">${esc(f.fam)}</b><span class="mut" style="font-size:12px">encaixe do ${esc(f.lote)}: ${Object.entries(f.enc).map(([k,n])=>n+'× '+k.split(' ')[1]).join(' + ')}</span></div>`;
-    if(!pr.length){h+='<p class="mut" style="margin:6px 0 0">Não precisa cortar agora.</p></div>';return}
-    h+=`<table style="margin-top:8px"><tr><th style="text-align:left">Cor</th><th>Folhas</th><th>Rolos</th><th>Peças</th><th>Tecido</th></tr>${pr.map(c=>{const t=tecidoDe(c.cor),ok=t&&t.rolos!=null?t.rolos>=c.rolos:null;return `<tr><td><span class="dot" style="background:${COR_HEX[c.cor]}"></span> ${c.cor}</td><td>${c.folhas}</td><td><b>${c.rolos}</b></td><td style="font-size:12px">${Object.entries(c.pecas).map(([k,p])=>k.split(' ')[1]+' '+p.faz).join('<br>')}</td><td style="font-size:12px;color:${ok===null?'var(--mut)':ok?'var(--ok)':'#f07a55'}">${t&&t.rolos!=null?(ok?'tem '+t.rolos:'falta '+(c.rolos-t.rolos))+'<br><span class="mut">'+esc(t.nome)+'</span>':'—'}</td></tr>`}).join('')}</table></div>`});
-  if(P.sem.length)h+=`<div class="card"><div class="k">Outros modelos (sem encaixe registrado)</div>${P.sem.map(o=>`<div class="row sp" style="font-size:13.5px;margin:5px 0"><span>${esc(o.x.modelo)} ${tamCurto(o.x.tam)} ${esc(o.x.cor)}</span><b>${n0(o.n)} pçs</b></div>`).join('')}</div>`;
+  const P=planoCorte(),tp=P.cores.reduce((s,c)=>s+c.need,0);
+  h+=`<div class="card"><div class="k">O que cortar para cobrir ${PA} dias</div><div class="mut" style="font-size:12px">Já desconta o estoque e o que está na oficina. Rolos estimados com ${n0(P.ppr)} peças por rolo (média dos seus lotes).</div>
+  <div class="grid2" style="margin-top:8px"><div><div class="k">Peças</div><div class="big">${n0(tp)}</div></div><div><div class="k">Rolos (estimado)</div><div class="big">${n0(P.rolos)}</div></div></div></div>`;
+  if(!tp)return h+'<p class="mut">Nada para cortar nesse horizonte.</p>'+previsao();
+  h+=`<div class="card"><div class="k">Por cor</div><table style="margin-top:6px"><tr><th style="text-align:left">Cor</th><th>Peças</th><th>Rolos</th><th>Tecido</th></tr>${P.cores.filter(c=>c.need).map(c=>{const t=c.tec,ok=t&&t.rolos!=null?t.rolos>=c.rolos:null;return `<tr><td><span class="dot" style="background:${COR_HEX[c.cor]}"></span> ${c.cor}</td><td>${n0(c.need)}</td><td><b>${c.rolos}</b></td><td style="font-size:12px;color:${ok===null?'var(--mut)':ok?'var(--ok)':'#f07a55'}">${t&&t.rolos!=null?(ok?'tem '+t.rolos:'falta '+(c.rolos-t.rolos))+' <span class="mut">'+esc(t.nome)+'</span>':'—'}</td></tr>`}).join('')}</table></div>
+  <div class="card"><div class="k">Peças por modelo</div><table style="margin-top:6px"><tr><th></th>${CORES.map(c=>`<th><span class="dot" style="background:${COR_HEX[c]}"></span></th>`).join('')}<th>Total</th></tr>${P.grid.map(o=>`<tr><td>${esc(o.nome)}</td>${CORES.map(c=>`<td style="${o.cores[c]?'font-weight:700':''}">${o.cores[c]?n0(o.cores[c]):'—'}</td>`).join('')}<td><b>${n0(CORES.reduce((s,c)=>s+(o.cores[c]||0),0))}</b></td></tr>`).join('')}</table></div>`;
+  return h+previsao();
+}
+function previsao(){
+  let h='';
   const L=ativos().filter(x=>x.media>0).map(x=>({x,d:x.media?Math.floor((x.estoque+x.producao)/x.media):999,dp:x.media?Math.floor(x.estoque/x.media):999})).sort((a,b)=>a.dp-b.dp);
   h+=`<div class="k" style="margin:16px 4px 6px">Previsão — quando cada SKU acaba</div><div class="card">${L.map(({x,d,dp})=>`<div class="row sp" style="font-size:13.5px;margin:6px 0" onclick="detSku('${x.sku}')"><span><span class="dot" style="background:${COR_HEX[x.cor]||'#888'}"></span> ${esc(x.modelo)} ${tamCurto(x.tam)} ${esc(x.cor)}</span><span style="text-align:right"><b style="color:${dp<=7?'#f07a55':dp<=15?'var(--warn)':'var(--ink)'}">${dp>=999?'—':dbr(addDias(hoje(),dp))}</b> <span class="mut">(${dp}d)</span>${x.producao?`<div class="mut" style="font-size:11px">com oficina: ${dbr(addDias(hoje(),d))}</div>`:''}</span></div>`).join('')}</div>
   <p class="mut" style="font-size:12px">Data em que o estoque pronto acaba no ritmo dos últimos 15 dias. "Com oficina" soma o que ainda vai chegar.</p>`;
@@ -626,7 +625,7 @@ let OD=60;
 function vOficinas(){
   const ini=addDias(hoje(),-OD),dono=D.user.dono,lotes={};D.producao.lotes.forEach(l=>lotes[l.lote]=l.data);
   const E=D.entregas.itens.filter(e=>e.data>=ini&&!e.pend),by={};
-  E.forEach(e=>{const k=e.oficina||'(sem oficina)',o=by[k]=by[k]||{nome:k,boas:0,def:0,val:0,dias:new Set(),pz:0,pzq:0,mods:{}};o.boas+=e.boas;o.def+=e.defeito;o.val+=e.valor||0;o.dias.add(e.data);o.mods[e.modelo]=(o.mods[e.modelo]||0)+e.boas;
+  E.forEach(e=>{const k=e.oficina||'(sem oficina)',o=by[k]=by[k]||{nome:k,boas:0,def:0,val:0,dias:new Set(),pz:0,pzq:0,mods:{}};o.boas+=e.boas;o.def+=e.defeito;o.val+=e.valor||0;o.dias.add(e.data);const mk=e.modelo.charAt(0).toUpperCase()+e.modelo.slice(1).toLowerCase();o.mods[mk]=(o.mods[mk]||0)+e.boas;
     if(e.lote&&lotes[e.lote]){o.pz+=difDias(e.data,lotes[e.lote])*e.boas;o.pzq+=e.boas}});
   const L=Object.values(by).sort((a,b)=>b.boas-a.boas);
   let h=`<div class="chips">${[30,60,90].map(n=>`<button class="${OD===n?'on':''}" onclick="OD=${n};render()">${n} dias</button>`).join('')}</div>`;
