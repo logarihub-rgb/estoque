@@ -135,6 +135,15 @@ nav button{position:relative}nav .bdg{position:absolute;top:4px;left:calc(50% + 
 .tog{border:1px solid var(--line);background:#141210;color:var(--mut);border-radius:6px;padding:7px 10px;font:inherit;font-size:12px;font-weight:700;min-width:74px}
 .tog.on{background:#2f4a26;border-color:#3c6a2e;color:#cfe8b8}
 .pend{opacity:.6}
+.scan{position:fixed;inset:0;background:#000;z-index:60;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;color:#fff}.scan video{width:100%;max-height:70vh;object-fit:cover}.scan .mira{position:absolute;top:28%;left:50%;width:220px;height:220px;margin-left:-110px;border:3px solid var(--acc);border-radius:14px;box-shadow:0 0 0 2000px rgba(0,0,0,.35)}
+.paper{background:#fff;color:#1b1b1b;border-radius:8px;padding:18px;font-size:13px}.paper h3{margin:0;font:800 22px var(--serif);letter-spacing:2px}.paper h4{margin:16px 0 6px;font:800 14px var(--serif);border-bottom:2px solid #1b1b1b;padding-bottom:3px;text-transform:uppercase;letter-spacing:1px}
+.paper table{width:100%;border-collapse:collapse}.paper td,.paper th{border-bottom:1px solid #ddd;padding:5px 4px;color:#1b1b1b;font-size:12.5px}.paper small{color:#666}
+.paper .ph{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:3px double #1b1b1b;padding-bottom:8px;margin-bottom:12px}
+.paper .kp{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.paper .kp div{border:1px solid #ccc;border-radius:6px;padding:8px;text-align:center;display:flex;flex-direction:column}.paper .kp b{font:800 20px var(--serif)}
+.paper .ass{display:flex;gap:30px;margin-top:50px}.paper .ass div{flex:1;border-top:1px solid #1b1b1b;text-align:center;padding-top:4px;font-size:12px}
+.etq{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.lbl{border:1px dashed #999;border-radius:6px;padding:8px;text-align:center;display:flex;flex-direction:column;align-items:center;break-inside:avoid}.lbl .qr{width:90px;height:90px}.lbl .qr svg{width:100%;height:100%}.lbl b{font:800 15px var(--serif);margin-top:4px}.lbl small{font-size:9px;color:#666}
+.sbox{width:100%;padding:11px 12px;border-radius:8px;border:1px solid var(--line);background:#141210;color:var(--ink);font:inherit;margin-bottom:10px}
+@media print{header,nav,.noprint,#modal,.toast,.fila{display:none!important}body{background:#fff!important}main,#view{padding:0!important;margin:0!important}.paper{border-radius:0;padding:0}.tog{display:none}}
 .mnav{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}.mnav button{background:none;border:1px solid var(--line);color:var(--acc);border-radius:6px;padding:6px 12px;font:inherit;font-size:16px}
 </style>
 </head>
@@ -209,12 +218,12 @@ async function processaFila(){
 function acao(a,p,otimista){const f=fila();f.push({a,p,t:Date.now()});setFila(f);close_();if(otimista)otimista();toast('Salvando…');render();processaFila()}
 function vFila(){const f=fila();if(!f.length)return'';const err=f.find(x=>x.erro);return`<div class="fila"><span>${f.length} lançamento${f.length>1?'s':''} ${err?'não enviado — '+esc(err.erro):'sendo salvo…'}</span>${err?`<span><button onclick="processaFila()">Tentar de novo</button> <button style="background:none;color:#f0b48a;border:1px solid #6a2f20" onclick="if(confirm('Descartar os lançamentos pendentes?')){setFila([]);carregar(true)}">Descartar</button></span>`:''}</div>`}
 function ir(t){TAB=t;window.scrollTo(0,0);render()}
-const VIEWS={painel:()=>vPainel(),estoque:()=>vEstoque(),producao:()=>vProducao(),entregas:()=>vEntregas(),mais:()=>vMais(),alertas:()=>vAlertas(),vendas:()=>vVendas(),resumo:()=>vResumo(),pagamento:()=>vPagamento()};
-const NAVOF={alertas:'mais',vendas:'mais',resumo:'mais',pagamento:'mais'};
+const VIEWS={planejar:()=>vPlanejar(),oficinas:()=>vOficinas(),tecido:()=>vTecido(),relatorio:()=>vRelatorio(),etiquetas:()=>vEtiquetas(),usuarios:()=>vUsuarios(),historico:()=>vHistorico(),recibo:()=>vRecibo(),painel:()=>vPainel(),estoque:()=>vEstoque(),producao:()=>vProducao(),entregas:()=>vEntregas(),mais:()=>vMais(),alertas:()=>vAlertas(),vendas:()=>vVendas(),resumo:()=>vResumo(),pagamento:()=>vPagamento()};
+const NAVOF={planejar:'mais',oficinas:'mais',tecido:'mais',relatorio:'mais',etiquetas:'mais',usuarios:'mais',historico:'mais',recibo:'mais',alertas:'mais',vendas:'mais',resumo:'mais',pagamento:'mais'};
 function render(){if(!D)return;const nt=NAVOF[TAB]||TAB;document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.t===nt));
   const na=alertas().filter(a=>a.n>=3).length;$('#bdg').innerHTML=na?`<span class="bdg">${na}</span>`:'';
   let h='';try{h=VIEWS[TAB]()}catch(e){h='<p class="mut">Erro ao montar a tela: '+esc(e.message)+'</p>'}
-  $('#view').innerHTML=vFila()+(NAVOF[TAB]?`<button class="tog" style="margin-bottom:12px" onclick="ir('mais')">‹ Voltar</button>`:'')+h}
+  $('#view').innerHTML=vFila()+(NAVOF[TAB]&&TAB!=='recibo'?`<button class="tog noprint" style="margin-bottom:12px" onclick="ir('mais')">‹ Voltar</button>`:'')+h}
 function open_(h){$('#modal').innerHTML=`<div class="sheet" onclick="if(event.target===this)close_()"><div>${h}<button class="btn sec" onclick="close_()">Fechar</button></div></div>`}
 function close_(){$('#modal').innerHTML=''}
 const val=id=>$('#'+id).value;
@@ -260,10 +269,15 @@ function vPainel(){
 /* ---------- ESTOQUE ---------- */
 function vEstoque(){
   const mods=['Todos',...new Set(D.estoque.map(x=>x.modelo))];
-  let h=`<div class="chips">${mods.map(m=>`<button class="${FM===m?'on':''}" onclick="FM='${m}';render()">${m}</button>`).join('')}</div>
-  <div class="chips">${[['Todos','Todos'],['ZERADO','Zerados'],['REPOR','Repor já'],['ATENCAO','Atenção'],['OK','OK'],['FORA','Fora de linha']].map(s=>`<button class="${FS===s[0]?'on':''}" onclick="FS='${s[0]}';render()">${s[1]}</button>`).join('')}</div>`;
-  let l=D.estoque.filter(x=>(FM==='Todos'||x.modelo===FM)&&(FS==='Todos'||stk(x.status)===FS));
-  h+=`<div class="hdcores"><span style="text-align:left">Modelo</span>${CORES.map(c=>`<span><span class="dot" style="background:${COR_HEX[c]}"></span> ${c}</span>`).join('')}</div>`;
+  return `<div class="row" style="gap:8px"><input class="sbox" placeholder="🔎 Buscar: malta azul, R3, preto…" value="${esc(Q)}" oninput="buscaQ(this.value)"><button class="tog" style="min-width:0;margin-bottom:10px;padding:10px 12px" onclick="lerQR(v=>{const x=skuPorQR(v);x?detSku(x.sku):toast('Etiqueta não reconhecida')})">📷</button></div>
+  <div class="chips">${mods.map(m=>`<button class="${FM===m?'on':''}" onclick="FM='${m}';render()">${m}</button>`).join('')}</div>
+  <div class="chips">${[['Todos','Todos'],['ZERADO','Zerados'],['REPOR','Repor já'],['ATENCAO','Atenção'],['OK','OK'],['FORA','Fora de linha']].map(s=>`<button class="${FS===s[0]?'on':''}" onclick="FS='${s[0]}';render()">${s[1]}</button>`).join('')}</div>
+  <div id="elist">${listaEstoque()}</div>
+  <button class="btn sec" style="margin-top:6px" onclick="fAjuste()">± Ajuste de estoque (contagem, defeito, devolução)</button>`;
+}
+function listaEstoque(){
+  let l=filtraQ(D.estoque.filter(x=>(FM==='Todos'||x.modelo===FM)&&(FS==='Todos'||stk(x.status)===FS)));
+  let h=`<div class="hdcores"><span style="text-align:left">Modelo</span>${CORES.map(c=>`<span><span class="dot" style="background:${COR_HEX[c]}"></span> ${c}</span>`).join('')}</div>`;
   grupos(l).forEach(g=>{
     h+=`<div class="skurow"><div class="nm"><b>${esc(g.modelo)}</b><span class="mut" style="font-size:12px">${esc(g.tam)}</span></div>`;
     CORES.forEach(c=>{const x=g.itens[c];h+=x?`<div class="cel ${stk(x.status)}" onclick="detSku('${x.sku}')"><b>${n0(x.estoque)}</b><span class="mut">${x.dias==null?'—':n0(x.dias)+'d'}</span>${x.producao?`<div class="pz">+${n0(x.producao)}</div>`:''}${x.piranha?'<div class="pz">🐟</div>':''}</div>`:'<div class="cel" style="opacity:.25">—</div>'});
@@ -289,7 +303,7 @@ function detSku(sku){
   <tr><td>Sugestão produzir</td><td>${x.sugestao?n0(x.sugestao)+' pçs':'—'}</td></tr>
   <tr><td>Vendas no mês</td><td>${n0(x.mes)}</td></tr>
   ${D.user.dono&&x.valor!=null?`<tr><td>Valor em estoque (custo)</td><td>${brl(x.valor)}</td></tr>`:''}
-  </table></div>`);
+  </table></div><button class="btn sec" onclick="fAjuste('${x.sku}')">± Ajustar este SKU</button>`);
 }
 
 /* ---------- PRODUÇÃO ---------- */
@@ -348,9 +362,9 @@ function vEntregas(){
   Object.keys(by).sort().reverse().slice(0,20).forEach(d=>{
     const L=by[d],tb=L.reduce((s,e)=>s+e.boas,0),td=L.reduce((s,e)=>s+e.defeito,0);
     h+=`<div class="card"><div class="row sp"><b style="font:800 17px var(--serif)">${dbr(d)}</b><span><b>${n0(tb)}</b> boas${td?` · <span style="color:var(--bad)">${n0(td)} defeito</span>`:''}${dono?' · '+brl(L.reduce((s,e)=>s+(e.valor||0),0)):''}</span></div>
-    <table style="margin-top:6px">${L.map(e=>`<tr class="${e.pend?'pend':''}"><td>${esc(e.modelo)} ${tamCurto(e.tam)} <span class="dot" style="background:${COR_HEX[e.cor]||'#888'}"></span> ${esc(e.cor)}${e.lote?' <span class="mut">'+esc(e.lote)+'</span>':''}</td><td>${n0(e.boas)}${e.defeito?` <span style="color:var(--bad)">+${e.defeito}d</span>`:''}</td><td class="mut" style="font-size:11px">${esc(e.oficina)}</td></tr>`).join('')}</table></div>`;
+    <table style="margin-top:6px">${L.map(e=>`<tr class="${e.pend?'pend':''}" ${e.pend||!e.linha?'':`onclick="eEntrega(${e.linha})"`}><td>${esc(e.modelo)} ${tamCurto(e.tam)} <span class="dot" style="background:${COR_HEX[e.cor]||'#888'}"></span> ${esc(e.cor)}${e.lote?' <span class="mut">'+esc(e.lote)+'</span>':''}</td><td>${n0(e.boas)}${e.defeito?` <span style="color:var(--bad)">+${e.defeito}d</span>`:''}</td><td class="mut" style="font-size:11px">${esc(e.oficina)}</td></tr>`).join('')}</table></div>`;
   });
-  if(!E.length)h+='<p class="mut">Nenhuma entrega lançada.</p>';
+  if(!E.length)h+='<p class="mut">Nenhuma entrega lançada.</p>';else h+='<p class="mut" style="font-size:12px">Toque numa linha para corrigir ou apagar.</p>';
   return h;
 }
 let BL=[];
@@ -362,7 +376,7 @@ function fEntrega(){
   <div class="grid2"><div><label>Data</label><input id="edata" type="date" value="${hoje()}"></div><div><label>Lote</label><select id="elote"><option value="">—</option>${lotes.map(l=>`<option ${l===(D.producao.lotes.slice(-1)[0]||{}).lote?'selected':''}>${esc(l)}</option>`).join('')}</select></div></div>
   <label>Oficina</label><select id="eofi"><option value="">Do lote (padrão)</option>${(D.entregas.oficinas||[]).map(o=>`<option>${esc(o)}</option>`).join('')}</select>
   <div id="eblocos"></div>
-  <button class="btn sec" onclick="BL.push({k:''});desenhaBlocos()">+ Outro modelo / tamanho</button>
+  <div class="row" style="gap:8px;margin-top:10px"><button class="btn sec" style="margin:0" onclick="BL.push({k:''});desenhaBlocos()">+ Outro modelo / tamanho</button><button class="btn sec" style="margin:0;max-width:110px" onclick="lerQR(v=>scanBloco(v,BL,desenhaBlocos,'eb_'))">📷 Ler</button></div>
   <label>Observação</label><input id="eobs">
   <div class="row sp" style="margin-top:12px"><span class="k">Total</span><b class="tot" id="etot">0</b></div>
   <button class="btn" onclick="sEntrega()">Salvar entrega</button>`);
@@ -395,6 +409,13 @@ function vMais(){
   let h=it('alertas','⚠','Alertas',A.length?`${A.length} aviso${A.length>1?'s':''}${urg?` · ${urg} urgente${urg>1?'s':''}`:''}`:'Nada pendente',urg?`<span class="pill st-ZERADO">${urg}</span>`:'');
   h+=it('vendas','📈','Vendas',`${n0(v.tot)} peças em 15 dias · ${n0(v.tot/15)}/dia`);
   h+=it('resumo','🗓','Resumo do mês',nomeMes(hoje().slice(0,7)));
+  const pc=planoCorte(),pr=pc.out.reduce((s,f)=>s+f.rolos,0);
+  h+=it('planejar','✂','Planejar corte e previsão',pr?`Sugestão: ${pr} rolos para cobrir ${PA} dias`:'Nada urgente para cortar');
+  h+=it('oficinas','🏭','Ranking das oficinas','Peças, defeito, prazo e custo');
+  if(D.tecido)h+=it('tecido','🧵','Estoque de tecido',`${n0(D.tecido.totalRolos)} rolos · lançar chegada`);
+  h+=it('relatorio','📄','Relatório em PDF','Semana ou mês, pronto para enviar');
+  h+=it('etiquetas','🏷','Etiquetas QR','Imprimir etiquetas para ler com a câmera');
+  if(D.user.dono){h+=it('usuarios','👥','Pessoas e PINs',`${(D.usuarios||[]).length} pessoa(s)`);h+=it('historico','🕘','Histórico',`Quem lançou o quê`)}
   if(D.user.dono&&D.pagamento){const ab=pagAberto();h+=it('pagamento','💰','Pagamento das oficinas',ab?`${brl(ab)} em aberto`:'Tudo pago')}
   h+=`<button class="menu" onclick="if(confirm('Sair deste celular?')){store('est_pin');store(CK());location.reload()}"><b style="font-size:15px">Sair</b><div class="mut" style="font-size:12.5px">Trocar de PIN</div></button>`;
   return h;
@@ -504,7 +525,7 @@ function vPagamento(){
     const fim=fimSemana(b),fechada=/fechad/i.test(b.situacao),atual=b.inicio&&b.inicio<=H&&fim>=H;
     h+=`<div class="card"><div class="row sp"><span><b style="font:800 18px var(--serif)">${esc(b.periodo)}</b><div class="mut" style="font-size:12px">${esc(b.mes)} · ${b.entregas.length} entrega${b.entregas.length===1?'':'s'}${atual?' · semana atual':''}</div></span><span class="pill ${fechada?'ok':'pe'}">${esc((b.situacao||'').replace(/^[^\wÀ-ú]+/,''))||'—'}</span></div>
     <table style="margin-top:8px"><tr><td>Peças</td><td>${n0(b.tot.totalpcs)}</td></tr><tr><td>Bruto</td><td>${brl(b.tot.rbruto)}</td></tr>${b.tot.faltaconferir?`<tr><td>Falta conferir</td><td style="color:var(--warn)">${n0(b.tot.faltaconferir)}</td></tr>`:''}<tr><td>Falta pagar</td><td><b style="color:${b.tot.faltapagar?'#f07a55':'var(--ok)'}">${brl(b.tot.faltapagar)}</b></td></tr></table>`;
-    b.oficinas.forEach((o,j)=>{h+=`<div class="bloco"><div class="row sp"><span><b>${esc(o.oficina)}</b><div class="mut" style="font-size:12px">${n0(o.pecas)} pçs · bruto ${brl(o.bruto)}${o.vales?' · vales '+brl(o.vales):''}</div></span><span style="text-align:right"><div style="font-weight:800">${brl(o.apagar)}</div><button class="tog ${o.pago?'on':''}" onclick="pagTog(${i},'o',${j})">${o.pago?'✓ Pago':'Pago?'}</button></span></div></div>`});
+    b.oficinas.forEach((o,j)=>{h+=`<div class="bloco"><div class="row sp"><span><b>${esc(o.oficina)}</b><div class="mut" style="font-size:12px">${n0(o.pecas)} pçs · bruto ${brl(o.bruto)}${o.vales?' · vales '+brl(o.vales):''}</div></span><span style="text-align:right"><div style="font-weight:800">${brl(o.apagar)}</div><button class="tog ${o.pago?'on':''}" onclick="pagTog(${i},'o',${j})">${o.pago?'✓ Pago':'Pago?'}</button> <button class="tog" style="min-width:0" onclick="abreRecibo(${i},${j})">Recibo</button></span></div></div>`});
     const k='s'+i;
     h+=`<button class="tog" style="width:100%;margin-top:10px" onclick="PAGX['${k}']=!PAGX['${k}'];render()">${PAGX[k]?'Esconder':'Ver'} entregas (${b.entregas.length})</button>`;
     if(PAGX[k])h+=`<table style="margin-top:8px"><tr><th style="text-align:left">Data</th><th>Pçs</th><th>Vale</th><th>Conf.</th></tr>${b.entregas.map((e,j)=>`<tr><td>${dbr(e.data)} <span class="mut" style="font-size:11px">${esc(e.modelo)} · ${esc(e.oficina)}</span></td><td>${n0(e.qtd)}</td><td><button class="tog" style="min-width:0;padding:4px 7px" onclick="pagVale(${i},${j})">${e.vale?n0(e.vale):'+'}</button></td><td><button class="tog ${e.conf?'on':''}" style="min-width:0;padding:4px 9px" onclick="pagTog(${i},'e',${j})">${e.conf?'✓':'—'}</button></td></tr>`).join('')}</table>`;
@@ -516,8 +537,220 @@ function vPagamento(){
 async function pagEnviar(p,desfaz){sync(true,'salvando');try{const r=await call('pagSet',p,true);D.pagamento=r.pagamento;store(CK(),JSON.stringify(D));toast('Salvo na planilha')}catch(e){desfaz();toast('Erro: '+e.message)}finally{sync(false);render()}}
 function pagTog(i,t,j){const b=D.pagamento[i],x=t==='o'?b.oficinas[j]:b.entregas[j],campo=t==='o'?'pago':'conf',c=t==='o'?x.cPago:x.cConf,velho=x[campo];
   if(t==='o'&&!velho&&!confirm(`Marcar ${x.oficina} como pago (${brl(x.apagar)})?`))return;
-  x[campo]=!velho;render();pagEnviar({campo,r:x.r,c,valor:!velho},()=>{x[campo]=velho})}
+  x[campo]=!velho;render();pagEnviar({campo,r:x.r,c,valor:!velho,desc:(x.oficina||'')+' '+(b.periodo||'')},()=>{x[campo]=velho})}
 function pagVale(i,j){const e=D.pagamento[i].entregas[j],v=prompt(`Vale para a entrega de ${dbr(e.data)} (${e.oficina}). Deixe vazio para tirar:`,e.vale||'');if(v===null)return;const velho=e.vale;e.vale=num(v);render();pagEnviar({campo:'vale',r:e.r,c:e.cVale,valor:e.vale},()=>{e.vale=velho})}
+
+
+// ---------- BUSCA + AJUSTE (Estoque) ----------
+let Q='';
+const norm=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+function filtraQ(l){if(!Q.trim())return l;const t=norm(Q).split(/\s+/).filter(Boolean);return l.filter(x=>{const h=norm([x.sku,x.modelo,x.tam,x.cor].join(' '));return t.every(w=>h.includes(w))})}
+function buscaQ(v){Q=v;const e=$('#elist');if(e)e.innerHTML=listaEstoque()}
+let BA=[],AJM='';
+function fAjuste(sku){
+  const ms=(D.ajustes&&D.ajustes.motivos||['Contagem/Inventário','Suja','Defeito','Devolução']);AJM=AJM||ms[0];
+  BA=[{k:''}];if(sku){const x=D.estoque.find(s=>s.sku===sku);if(x)BA=[{k:x.modelo+'|'+x.tam}]}
+  open_(`<h2>Ajuste de estoque</h2>
+  <div class="grid2"><div><label>Data</label><input id="adata" type="date" value="${hoje()}"></div><div><label>Motivo</label><select id="amot" onchange="AJM=this.value;desenhaAj()">${ms.map(m=>`<option ${m===AJM?'selected':''}>${esc(m)}</option>`).join('')}</select></div></div>
+  <p class="mut" id="ahint" style="font-size:12px;margin:8px 0 0"></p>
+  <div id="ablocos"></div>
+  <div class="row" style="gap:8px;margin-top:10px"><button class="btn sec" style="margin:0" onclick="BA.push({k:''});desenhaAj()">+ Outro modelo</button><button class="btn sec" style="margin:0;max-width:110px" onclick="lerQR(v=>scanBloco(v,BA,desenhaAj,'aq_'))">📷 Ler</button></div>
+  <label>Observação</label><input id="aobs">
+  <div class="row sp" style="margin-top:12px"><span class="k">Total do ajuste</span><b class="tot" id="atot">0</b></div>
+  <button class="btn" onclick="sAjuste()">Salvar ajuste</button>`);
+  desenhaAj();
+}
+const ajContagem=()=>/contagem|invent/i.test(AJM),ajSinal=()=>/devol|entrada|sobra/i.test(AJM)?1:-1;
+function desenhaAj(){
+  const cs=combos(),cont=ajContagem();
+  $('#ahint').textContent=cont?'Digite quanto você CONTOU. O app calcula a diferença para o estoque atual.':(ajSinal()>0?'As quantidades ENTRAM no estoque.':'As quantidades SAEM do estoque.');
+  $('#ablocos').innerHTML=BA.map((b,i)=>`<div class="bloco"><div class="row sp"><span class="k">Modelo e tamanho</span>${BA.length>1?`<button style="background:none;border:0;color:var(--bad);font-size:18px" onclick="BA.splice(${i},1);desenhaAj()">×</button>`:''}</div>
+  <div class="pills" style="margin-top:6px">${cs.map(c=>{const k=c.modelo+'|'+c.tam;return `<button class="${b.k===k?'on':''}" onclick="BA[${i}].k='${k}';desenhaAj()">${esc(c.modelo)} ${tamCurto(c.tam)}</button>`}).join('')}</div>
+  ${b.k?`<div class="gq"><span class="h">Cor</span><span class="h">${cont?'Contado':'Qtd'}</span><span class="h">${cont?'Diferença':'Atual'}</span>${CORES.map(c=>{const x=skuDe(b.k,c),at=x?x.estoque:0,q=(b.q||{})[c];return `<span><span class="dot" style="background:${COR_HEX[c]}"></span> ${c}</span><input id="aq_${i}_${c}" inputmode="numeric" placeholder="${cont?n0(at):'0'}" value="${q==null?'':q}" oninput="guardaAj(${i})"><span id="ad_${i}_${c}" style="text-align:center;font-weight:700">${cont?difTxt(q,at):n0(at)}</span>`}).join('')}</div>`:''}</div>`).join('');
+  somaAj();
+}
+const skuDe=(k,c)=>{const[m,t]=k.split('|');return D.estoque.find(x=>x.modelo===m&&x.tam===t&&x.cor===c)};
+const difTxt=(q,at)=>q==null||q===''?'—':(q-at>0?'+':'')+n0(q-at);
+function guardaAj(i){const b=BA[i];b.q={};CORES.forEach(c=>{const s=val('aq_'+i+'_'+c);b.q[c]=s===''?null:num(s);if(ajContagem()){const x=skuDe(b.k,c),e=$('#ad_'+i+'_'+c);if(e)e.textContent=difTxt(b.q[c],x?x.estoque:0)}});somaAj()}
+function itensAj(){const out=[],cont=ajContagem(),sg=ajSinal();BA.forEach(b=>{if(!b.k)return;const[modelo,tam]=b.k.split('|');CORES.forEach(c=>{const q=(b.q||{})[c];if(q==null||q==='')return;const x=skuDe(b.k,c),at=x?x.estoque:0;const d=cont?q-at:sg*Math.abs(q);if(d)out.push({modelo,tam,cor:c,qtd:d,obs:cont?`contado ${q}, tinha ${at}`:''})})});return out}
+function somaAj(){const t=itensAj().reduce((s,i)=>s+i.qtd,0),e=$('#atot');if(e)e.textContent=(t>0?'+':'')+n0(t)+' peças'}
+function sAjuste(){const itens=itensAj();if(!itens.length)return toast('Nada para ajustar');const t=itens.reduce((s,i)=>s+i.qtd,0);
+  if(!confirm(`Lançar ajuste "${AJM}" de ${t>0?'+':''}${t} peças em ${itens.length} SKU(s)?`))return;
+  const P={data:val('adata'),motivo:AJM,obs:val('aobs'),itens};
+  acao('novoAjuste',P,()=>itens.forEach(i=>{const x=skuDe(i.modelo+'|'+i.tam,i.cor);if(x)x.estoque+=i.qtd}))}
+
+// ---------- EDITAR / APAGAR ENTREGA ----------
+function eEntrega(linha){const e=D.entregas.itens.find(x=>x.linha===linha);if(!e)return;
+  open_(`<h2>Corrigir entrega</h2><p class="mut" style="margin:0">${dbr(e.data)} · ${esc(e.modelo)} ${tamCurto(e.tam)} ${esc(e.cor)}${e.lote?' · '+esc(e.lote):''}${e.oficina?' · '+esc(e.oficina):''}</p>
+  <div class="grid2" style="margin-top:10px"><div><label>Boas</label><input id="xb" inputmode="numeric" value="${e.boas}"></div><div><label>Defeito</label><input id="xd" inputmode="numeric" value="${e.defeito||0}"></div></div>
+  <button class="btn" onclick="sEditE(${linha})">Salvar correção</button>
+  <button class="btn sec" style="color:var(--bad);border-color:#6a2f20" onclick="sEditE(${linha},true)">Apagar esta entrega</button>`)}
+function sEditE(linha,apagar){const e=D.entregas.itens.find(x=>x.linha===linha);if(!e)return;
+  if(apagar&&!confirm(`Apagar ${e.boas} ${e.modelo} ${tamCurto(e.tam)} ${e.cor} de ${dbr(e.data)}? Isso tira as peças do estoque.`))return;
+  const b=num(val('xb')),d=num(val('xd'));
+  acao('editEntrega',{linha,boas:b,defeito:d,apagar:!!apagar,chk:{data:e.data,modelo:e.modelo,cor:e.cor}},()=>{if(apagar)D.entregas.itens=D.entregas.itens.filter(x=>x!==e);else{e.boas=b;e.defeito=d;e.pend=true}})}
+
+// ---------- PLANEJAR: previsão + plano de corte ----------
+let PA=30;
+function fpr(){let f=0,r=0;D.producao.lotes.forEach(l=>CORES.forEach(c=>{if(l.rolos[c]&&l.folhas[c]){f+=l.folhas[c];r+=l.rolos[c]}}));return r?f/r:6}
+function encaixeFam(){const o={};D.producao.lotes.slice().reverse().forEach(l=>Object.entries(l.encaixe||{}).forEach(([k,n])=>{const f=k.split(' ')[0];if(!o[f])o[f]={lote:l.lote,enc:{}};if(o[f].lote===l.lote)o[f].enc[k]=n}));return o}
+function tecidoDe(cor){const t=D.tecido;if(!t)return null;const m=(t.comprar||[]).find(x=>norm(x.peca)===norm(cor));const nome=m?m.tecido:cor;return {nome,rolos:(t.saldo||{})[nome]??null}}
+function planoCorte(){
+  const need=x=>Math.max(0,Math.round(x.media*PA-x.estoque-x.producao));
+  const EF=encaixeFam(),F=fpr(),out=[];
+  Object.entries(EF).forEach(([fam,{lote,enc}])=>{
+    const cores=CORES.map(c=>{let folhas=0;const pecas={};Object.entries(enc).forEach(([k,n])=>{const tam=k.split(' ')[1];const x=ativos().find(s=>s.modelo.toLowerCase()===fam.toLowerCase()&&tamCurto(s.tam)===tam&&s.cor===c);const nd=x?need(x):0;pecas[k]={need:nd};folhas=Math.max(folhas,Math.ceil(nd/n))});
+      Object.entries(enc).forEach(([k,n])=>pecas[k].faz=folhas*n);return{cor:c,folhas,rolos:Math.ceil(folhas/F),pecas}});
+    out.push({fam,lote,enc,cores,rolos:cores.reduce((s,c)=>s+c.rolos,0)});
+  });
+  const sem=ativos().filter(x=>!EF[x.modelo.split(' ')[0]]&&!Object.keys(EF).some(f=>f.toLowerCase()===x.modelo.toLowerCase())&&need(x)>0).map(x=>({x,n:need(x)}));
+  return{out,sem,F};
+}
+function vPlanejar(){
+  let h=`<div class="chips"><span class="mut" style="font-size:12px;align-self:center">Cobrir</span>${[20,30,45,60].map(n=>`<button class="${PA===n?'on':''}" onclick="PA=${n};render()">${n} dias</button>`).join('')}</div>`;
+  const P=planoCorte(),tot=P.out.reduce((s,f)=>s+f.rolos,0);
+  h+=`<div class="card"><div class="k">Plano de corte sugerido</div><div class="mut" style="font-size:12px">Para ter estoque para ${PA} dias, contando o que já está na oficina. Usa o último encaixe de cada modelo e ${n1(P.F)} folhas por rolo.</div><div class="big" style="margin-top:6px">${n0(tot)} <span style="font-size:16px">rolos</span></div></div>`;
+  P.out.forEach(f=>{const pr=f.cores.filter(c=>c.folhas);
+    h+=`<div class="card"><div class="row sp"><b style="font:800 19px var(--serif)">${esc(f.fam)}</b><span class="mut" style="font-size:12px">encaixe do ${esc(f.lote)}: ${Object.entries(f.enc).map(([k,n])=>n+'× '+k.split(' ')[1]).join(' + ')}</span></div>`;
+    if(!pr.length){h+='<p class="mut" style="margin:6px 0 0">Não precisa cortar agora.</p></div>';return}
+    h+=`<table style="margin-top:8px"><tr><th style="text-align:left">Cor</th><th>Folhas</th><th>Rolos</th><th>Peças</th><th>Tecido</th></tr>${pr.map(c=>{const t=tecidoDe(c.cor),ok=t&&t.rolos!=null?t.rolos>=c.rolos:null;return `<tr><td><span class="dot" style="background:${COR_HEX[c.cor]}"></span> ${c.cor}</td><td>${c.folhas}</td><td><b>${c.rolos}</b></td><td style="font-size:12px">${Object.entries(c.pecas).map(([k,p])=>k.split(' ')[1]+' '+p.faz).join('<br>')}</td><td style="font-size:12px;color:${ok===null?'var(--mut)':ok?'var(--ok)':'#f07a55'}">${t&&t.rolos!=null?(ok?'tem '+t.rolos:'falta '+(c.rolos-t.rolos))+'<br><span class="mut">'+esc(t.nome)+'</span>':'—'}</td></tr>`}).join('')}</table></div>`});
+  if(P.sem.length)h+=`<div class="card"><div class="k">Outros modelos (sem encaixe registrado)</div>${P.sem.map(o=>`<div class="row sp" style="font-size:13.5px;margin:5px 0"><span>${esc(o.x.modelo)} ${tamCurto(o.x.tam)} ${esc(o.x.cor)}</span><b>${n0(o.n)} pçs</b></div>`).join('')}</div>`;
+  const L=ativos().filter(x=>x.media>0).map(x=>({x,d:x.media?Math.floor((x.estoque+x.producao)/x.media):999,dp:x.media?Math.floor(x.estoque/x.media):999})).sort((a,b)=>a.dp-b.dp);
+  h+=`<div class="k" style="margin:16px 4px 6px">Previsão — quando cada SKU acaba</div><div class="card">${L.map(({x,d,dp})=>`<div class="row sp" style="font-size:13.5px;margin:6px 0" onclick="detSku('${x.sku}')"><span><span class="dot" style="background:${COR_HEX[x.cor]||'#888'}"></span> ${esc(x.modelo)} ${tamCurto(x.tam)} ${esc(x.cor)}</span><span style="text-align:right"><b style="color:${dp<=7?'#f07a55':dp<=15?'var(--warn)':'var(--ink)'}">${dp>=999?'—':dbr(addDias(hoje(),dp))}</b> <span class="mut">(${dp}d)</span>${x.producao?`<div class="mut" style="font-size:11px">com oficina: ${dbr(addDias(hoje(),d))}</div>`:''}</span></div>`).join('')}</div>
+  <p class="mut" style="font-size:12px">Data em que o estoque pronto acaba no ritmo dos últimos 15 dias. "Com oficina" soma o que ainda vai chegar.</p>`;
+  return h;
+}
+
+// ---------- OFICINAS ----------
+let OD=60;
+function vOficinas(){
+  const ini=addDias(hoje(),-OD),dono=D.user.dono,lotes={};D.producao.lotes.forEach(l=>lotes[l.lote]=l.data);
+  const E=D.entregas.itens.filter(e=>e.data>=ini&&!e.pend),by={};
+  E.forEach(e=>{const k=e.oficina||'(sem oficina)',o=by[k]=by[k]||{nome:k,boas:0,def:0,val:0,dias:new Set(),pz:0,pzq:0,mods:{}};o.boas+=e.boas;o.def+=e.defeito;o.val+=e.valor||0;o.dias.add(e.data);o.mods[e.modelo]=(o.mods[e.modelo]||0)+e.boas;
+    if(e.lote&&lotes[e.lote]){o.pz+=difDias(e.data,lotes[e.lote])*e.boas;o.pzq+=e.boas}});
+  const L=Object.values(by).sort((a,b)=>b.boas-a.boas);
+  let h=`<div class="chips">${[30,60,90].map(n=>`<button class="${OD===n?'on':''}" onclick="OD=${n};render()">${n} dias</button>`).join('')}</div>`;
+  if(!L.length)return h+'<p class="mut">Sem entregas no período.</p>';
+  L.forEach((o,i)=>{const pd=o.boas+o.def?o.def/(o.boas+o.def)*100:0;
+    h+=`<div class="card"><div class="row sp"><b style="font:800 19px var(--serif)">${i+1}º ${esc(o.nome)}</b><span class="pill">${o.dias.size} entrega${o.dias.size>1?'s':''}</span></div>
+    <div class="grid2" style="grid-template-columns:repeat(${dono?4:3},1fr);text-align:center;margin-top:8px">
+    <div><div class="k">Peças</div><div class="mid">${n0(o.boas)}</div></div>
+    <div><div class="k">Defeito</div><div class="mid" style="color:${pd>3?'#f07a55':pd>1?'var(--warn)':'var(--ok)'}">${n1(pd)}%</div></div>
+    <div><div class="k">Prazo médio</div><div class="mid">${o.pzq?n0(o.pz/o.pzq)+'d':'—'}</div></div>
+    ${dono?`<div><div class="k">Custo/pç</div><div class="mid" style="font-size:17px">${o.boas?brl(o.val/o.boas):'—'}</div></div>`:''}</div>
+    <div class="mut" style="font-size:12px;margin-top:6px">${Object.entries(o.mods).sort((a,b)=>b[1]-a[1]).map(([m,q])=>esc(m)+' '+n0(q)).join(' · ')}</div></div>`});
+  h+=`<p class="mut" style="font-size:12px">Prazo médio = dias entre o corte do lote e a entrega, pesado pelas peças.</p>`;
+  return h;
+}
+
+// ---------- TECIDO ----------
+function vTecido(){
+  const T=D.tecido;if(!T)return '<p class="mut">Aba ESTOQUE TECIDO não encontrada.</p>';
+  const cs=Object.entries(T.saldo||{}).filter(([k,v])=>v);
+  let h=`<button class="btn" style="margin:0 0 12px" onclick="fTecido()">+ Lançar tecido (chegada / ajuste)</button>
+  <div class="card"><div class="row sp"><div class="k">Rolos em estoque</div><span class="mut" style="font-size:12px">${n1(T.totalKg)} kg${D.user.dono&&T.totalValor?' · '+brl(T.totalValor):''}</span></div><div class="big">${n0(T.totalRolos)}</div>
+  <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px">${cs.map(([k,v])=>`<span class="pill">${esc(k)} <b>${n0(v)}</b></span>`).join('')||'<span class="mut">Sem tecido</span>'}</div></div>`;
+  if((T.comprar||[]).length)h+=`<div class="card"><div class="k">Dá para cortar?</div><table style="margin-top:6px"><tr><th style="text-align:left">Tecido → peça</th><th>Tem</th><th>Precisa</th><th>Comprar</th></tr>${T.comprar.map(c=>`<tr><td>${esc(c.tecido)} → ${esc(c.peca)}</td><td>${n0(c.estoque)}</td><td>${n0(c.cortar)}</td><td style="color:${c.falta?'#f07a55':'var(--ok)'};font-weight:700">${c.falta?n0(c.falta):'—'}</td></tr>`).join('')}</table></div>`;
+  if((T.locais||[]).length)h+=`<div class="card"><div class="k">Por local</div>${T.locais.map(l=>`<div class="row sp" style="font-size:13.5px;margin:6px 0"><span>${esc(l.local)} · ${esc(l.cortador)}</span><span><b>${n0(l.rolos)}</b> <span class="mut">${Object.entries(l.cores).map(([k,v])=>k+' '+v).join(', ')}</span></span></div>`).join('')}</div>`;
+  const ini=D.producao.lotes.filter(l=>l.data).slice(-6).reverse();
+  if(ini.length)h+=`<div class="card"><div class="k">Consumo nos últimos lotes</div>${ini.map(l=>`<div class="row sp" style="font-size:13.5px;margin:6px 0"><span>${esc(l.lote)} · ${dbr(l.data)}</span><span><b>${n0(CORES.reduce((s,c)=>s+(l.rolos[c]||0),0))}</b> rolos${l.kg?' · '+n1(l.kg)+' kg':''}${l.kg&&l.totalCortadas?` <span class="mut">${n0(l.totalCortadas/l.kg)} pç/kg</span>`:''}</span></div>`).join('')}</div>`;
+  h+=`<div class="k" style="margin:14px 4px 6px">Movimentações</div><div class="card">${(T.movs||[]).map(m=>`<div class="row sp" style="font-size:13px;margin:6px 0"><span>${dbr(m.data)} · ${esc(m.tipo)}<div class="mut" style="font-size:11.5px">${esc(m.local)} ${m.cortador?'· '+esc(m.cortador):''}${m.obs?' · '+esc(m.obs):''}</div></span><span style="text-align:right"><b style="color:${m.rolos<0?'#f07a55':'var(--ok)'}">${m.rolos>0?'+':''}${n0(m.rolos)}</b> ${esc(m.cor)}${m.kg?`<div class="mut" style="font-size:11.5px">${n1(m.kg)} kg${m.valor?' · '+brl(m.valor):''}</div>`:''}</span></div>`).join('')||'<span class="mut">Nenhuma</span>'}</div>`;
+  return h;
+}
+function fTecido(){const L=(D.tecido&&D.tecido.listas)||{},sel=(id,a,ph)=>a&&a.length?`<select id="${id}">${a.map(x=>`<option>${esc(x)}</option>`).join('')}</select>`:`<input id="${id}" placeholder="${ph||''}">`;
+  const tipos=(L.tipo||[]).length?L.tipo:['Chegada','Contagem','Ajuste'];
+  open_(`<h2>Lançar tecido</h2><div class="grid2"><div><label>Data</label><input id="tdata" type="date" value="${hoje()}"></div><div><label>Tipo</label>${sel('ttipo',tipos)}</div>
+  <div><label>Local</label>${sel('tloc',L.local)}</div><div><label>Cortador</label>${sel('tcort',L.cortador)}</div>
+  <div><label>Cor do tecido</label>${sel('tcor',L.cor,'ex: Preto')}</div><div><label>Rolos (+ entra, − sai)</label><input id="trol" inputmode="decimal" placeholder="ex: 10"></div>
+  <div><label>Kilos (opcional)</label><input id="tkg" inputmode="decimal"></div>${D.user.dono?`<div><label>Valor R$ (opcional)</label><input id="tval" inputmode="decimal"></div>`:'<div></div>'}</div>
+  <label>Observação</label><input id="tobs" placeholder="ex: NF 1234"><button class="btn" onclick="sTecido()">Salvar</button>`)}
+function sTecido(){const rol=num(val('trol'));if(!rol)return toast('Informe os rolos');const P={data:val('tdata'),tipo:val('ttipo'),local:val('tloc'),cortador:val('tcort'),cor:val('tcor'),rolos:rol,kg:num(val('tkg')),valor:$('#tval')?num(val('tval')):0,obs:val('tobs')};
+  acao('novoTecido',P,()=>{const T=D.tecido;if(T){T.movs.unshift(Object.assign({},P));T.saldo[P.cor]=(T.saldo[P.cor]||0)+rol;T.totalRolos=(T.totalRolos||0)+rol}})}
+
+// ---------- USUÁRIOS + HISTÓRICO (dono) ----------
+function vUsuarios(){if(!D.user.dono)return '<p class="mut">Sem acesso.</p>';
+  return `<button class="btn" style="margin:0 0 12px" onclick="fUsuario()">+ Nova pessoa</button>`+(D.usuarios||[]).map(u=>`<div class="card"><div class="row sp"><span><b style="font:800 17px var(--serif)">${esc(u.nome)}</b><div class="mut" style="font-size:12px">${u.perfil==='dono'?'Dono — vê tudo':'Equipe — sem custos e pagamentos'}</div></span><span><button class="tog" onclick="this.textContent='${esc(u.pin)}'">PIN ••••</button> <button class="tog" style="min-width:0" onclick="fUsuario(${u.linha})">Editar</button></span></div></div>`).join('')+
+  `<p class="mut" style="font-size:12px">Cada pessoa com o próprio PIN: o histórico mostra quem lançou o quê.</p>`}
+function fUsuario(linha){const u=(D.usuarios||[]).find(x=>x.linha===linha)||{nome:'',pin:'',perfil:'equipe'};
+  open_(`<h2>${linha?'Editar':'Nova'} pessoa</h2><label>Nome</label><input id="un" value="${esc(u.nome)}"><label>PIN (4 a 8 números)</label><input id="up" inputmode="numeric" value="${esc(u.pin)}">
+  <label>Perfil</label><select id="upf"><option value="equipe" ${u.perfil!=='dono'?'selected':''}>Equipe</option><option value="dono" ${u.perfil==='dono'?'selected':''}>Dono</option></select>
+  <button class="btn" onclick="acao('salvarUsuario',{linha:${linha||0},nome:val('un'),pin:val('up'),perfil:val('upf')})">Salvar</button>
+  ${linha?`<button class="btn sec" style="color:var(--bad)" onclick="if(confirm('Remover ${esc(u.nome)}? O PIN para de funcionar.'))acao('removerUsuario',{linha:${linha}})">Remover</button>`:''}`)}
+let HU='';
+function vHistorico(){if(!D.user.dono)return '<p class="mut">Sem acesso.</p>';const L=D.log||[],us=[...new Set(L.map(x=>x[1]))];
+  const f=L.filter(x=>!HU||x[1]===HU);
+  return `<div class="chips"><button class="${!HU?'on':''}" onclick="HU='';render()">Todos</button>${us.map(u=>`<button class="${HU===u?'on':''}" onclick="HU='${esc(u)}';render()">${esc(u)}</button>`).join('')}</div>`+
+  (f.length?f.map(x=>`<div class="al"><b>${esc(x[2])} <span class="mut" style="font-weight:400">· ${esc(x[1])}</span></b><span>${dbr(x[0].slice(0,10))} ${x[0].slice(11)} — ${esc(x[3])}</span></div>`).join(''):'<p class="mut">Nada registrado ainda. A partir de agora todo lançamento feito pelo app aparece aqui.</p>')}
+
+
+// ---------- QR: leitor e etiquetas ----------
+function carregaJS(src){return new Promise((ok,er)=>{if(document.querySelector(`script[src="${src}"]`))return ok();const s=document.createElement('script');s.src=src;s.onload=ok;s.onerror=()=>er(new Error('Sem internet para carregar o leitor'));document.head.appendChild(s)})}
+let QRS=null;
+async function lerQR(cb){
+  const ov=document.createElement('div');ov.className='scan';ov.innerHTML=`<video playsinline muted></video><div class="mira"></div><p>Aponte para a etiqueta QR</p><button class="btn sec" style="max-width:220px">Cancelar</button>`;document.body.appendChild(ov);
+  const vd=ov.querySelector('video');let parar=false,stream=null;
+  const fim=v=>{parar=true;if(stream)stream.getTracks().forEach(t=>t.stop());ov.remove();if(v)cb(v)};
+  ov.querySelector('button').onclick=()=>fim();
+  try{stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});vd.srcObject=stream;await vd.play()}catch(e){fim();return toast('Não consegui abrir a câmera')}
+  let det=null;if('BarcodeDetector' in window){try{det=new BarcodeDetector({formats:['qr_code']})}catch(e){}}
+  if(!det){try{await carregaJS('https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js')}catch(e){fim();return toast(e.message)}}
+  const cv=document.createElement('canvas'),cx=cv.getContext('2d',{willReadFrequently:true});
+  const loop=async()=>{if(parar)return;try{if(det){const r=await det.detect(vd);if(r[0])return fim(r[0].rawValue)}else if(vd.videoWidth){cv.width=vd.videoWidth;cv.height=vd.videoHeight;cx.drawImage(vd,0,0);const im=cx.getImageData(0,0,cv.width,cv.height);const r=jsQR(im.data,im.width,im.height);if(r&&r.data)return fim(r.data)}}catch(e){}setTimeout(loop,180)};loop();
+}
+const skuPorQR=v=>{v=String(v||'').trim().toUpperCase().replace(/^SKU[:\s]{0,3}/,'');return D.estoque.find(x=>x.sku.toUpperCase()===v)};
+function scanBloco(v,arr,redesenha,pref){const x=skuPorQR(v);if(!x)return toast('Etiqueta não reconhecida: '+v);const k=x.modelo+'|'+x.tam;let i=arr.findIndex(b=>b.k===k);if(i<0){i=arr.findIndex(b=>!b.k);if(i<0){arr.push({k});i=arr.length-1}else arr[i].k=k}redesenha();toast(`${x.modelo} ${tamCurto(x.tam)} ${x.cor}`);setTimeout(()=>{const e=$('#'+pref+i+'_'+x.cor);if(e){e.focus();e.scrollIntoView({block:'center'})}},50)}
+let EQM='Todos';
+function vEtiquetas(){
+  const mods=['Todos',...new Set(ativos().map(x=>x.modelo))],L=ativos().filter(x=>EQM==='Todos'||x.modelo===EQM);
+  setTimeout(desenhaQRs,30);
+  return `<div class="noprint"><div class="chips">${mods.map(m=>`<button class="${EQM===m?'on':''}" onclick="EQM='${m}';render()">${m}</button>`).join('')}</div>
+  <button class="btn" style="margin:0 0 12px" onclick="window.print()">🖨 Imprimir / salvar PDF</button><p class="mut" style="font-size:12px">Cole a etiqueta no saco ou na prateleira. No app, o botão 📷 lê a etiqueta e já escolhe o modelo, o tamanho e a cor.</p></div>
+  <div class="paper etq">${L.map(x=>`<div class="lbl"><div class="qr" data-v="${esc(x.sku)}"></div><b>${esc(x.modelo)} ${tamCurto(x.tam)}</b><span>${esc(x.cor)}</span><small>${esc(x.sku)}</small></div>`).join('')}</div>`}
+async function desenhaQRs(){const els=document.querySelectorAll('.qr[data-v]');if(!els.length)return;try{await carregaJS('https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js')}catch(e){return toast(e.message)}
+  els.forEach(e=>{const q=qrcode(0,'M');q.addData(e.dataset.v);q.make();e.innerHTML=q.createSvgTag({cellSize:3,margin:0,scalable:true})})}
+
+// ---------- RELATÓRIO (PDF) ----------
+let RP='mes';
+function periodoRel(){const H=hoje(),d=new Date(H+'T12:00'),dow=(d.getDay()+6)%7,seg=addDias(H,-dow);
+  if(RP==='semana')return[seg,H,'Esta semana'];if(RP==='semanaant')return[addDias(seg,-7),addDias(seg,-1),'Semana passada'];
+  if(RP==='mesant'){const p=new Date(d.getFullYear(),d.getMonth()-1,1),i=p.toISOString().slice(0,10).slice(0,7)+'-01';return[i,addDias(H.slice(0,7)+'-01',-1),nomeMes(i.slice(0,7))]}
+  return[H.slice(0,7)+'-01',H,nomeMes(H.slice(0,7))]}
+function vRelatorio(){
+  const[ini,fim,nome]=periodoRel(),dono=D.user.dono,L=vendasRange(ini,fim),tot=L.reduce((s,r)=>s+r[2],0),nd=Math.max(1,new Set(L.map(r=>r[0])).size);
+  const E=D.entregas.itens.filter(e=>e.data>=ini&&e.data<=fim&&!e.pend),eb=E.reduce((s,e)=>s+e.boas,0),ed=E.reduce((s,e)=>s+e.defeito,0),ev=E.reduce((s,e)=>s+(e.valor||0),0);
+  const lotes=D.producao.lotes.filter(l=>l.data>=ini&&l.data<=fim),ps=agrupa(L,r=>r[1]),pm=agrupa(L,r=>modeloDe(r[1]));
+  const A=ativos(),cnt=k=>A.filter(x=>stk(x.status)===k).length,est=A.reduce((s,x)=>s+x.estoque,0);
+  const al=alertas().filter(a=>a.n>=2).slice(0,10);
+  const tr=(a,b)=>`<tr><td>${a}</td><td style="text-align:right">${b}</td></tr>`;
+  let h=`<div class="noprint"><div class="chips">${[['semana','Esta semana'],['semanaant','Semana passada'],['mes','Este mês'],['mesant','Mês passado']].map(([k,t])=>`<button class="${RP===k?'on':''}" onclick="RP='${k}';render()">${t}</button>`).join('')}</div>
+  <button class="btn" style="margin:0 0 12px" onclick="window.print()">📄 Salvar PDF / Imprimir</button><p class="mut" style="font-size:12px">No celular: toque em Salvar PDF e escolha "Salvar como PDF" na impressora. Depois é só mandar pelo WhatsApp.</p></div>
+  <div class="paper"><div class="ph"><div><h3>LOGARI</h3><small>Relatório de estoque e produção</small></div><div style="text-align:right"><b>${esc(nome)}</b><br><small>${dbr(ini)} a ${dbr(fim)} · gerado ${D.atualizado}</small></div></div>
+  <div class="kp"><div><small>Vendidas</small><b>${n0(tot)}</b><small>${n0(tot/nd)}/dia</small></div><div><small>Entregues oficina</small><b>${n0(eb)}</b><small>${eb+ed?n1(ed/(eb+ed)*100):0}% defeito</small></div><div><small>Cortadas</small><b>${n0(lotes.reduce((s,l)=>s+(l.totalCortadas||0),0))}</b><small>${lotes.length} lote(s)</small></div><div><small>Estoque hoje</small><b>${n0(est)}</b><small>${cnt('ZERADO')} zerados · ${cnt('REPOR')} repor</small></div></div>
+  <h4>Vendas por modelo</h4><table>${pm.map(([m,q])=>tr(esc(m),n0(q)+' <small>('+n1(q/(tot||1)*100)+'%)</small>')).join('')||tr('—','')}</table>
+  <h4>Top 10 SKUs</h4><table>${ps.slice(0,10).map(([k,q],i)=>tr((i+1)+'º '+esc(nomeSku(k)),n0(q))).join('')||tr('—','')}</table>
+  <h4>Estoque por situação</h4><table>${tr('Zerados',cnt('ZERADO'))}${tr('Repor já',cnt('REPOR'))}${tr('Atenção',cnt('ATENCAO'))}${tr('OK',cnt('OK'))}${tr('Na oficina (peças)',n0(A.reduce((s,x)=>s+x.producao,0)))}</table>
+  ${dono?`<h4>Financeiro</h4><table>${tr('Custo de costura no período',brl(ev))}${tr('Custo médio por peça',eb?brl(ev/eb):'—')}${tr('Valor do estoque (custo)',brl(D.estoque.reduce((s,x)=>s+(x.valor||0),0)))}${D.pagamento?tr('Pagamentos de oficina em aberto',brl(pagAberto())):''}</table>`:''}
+  ${al.length?`<h4>Pontos de atenção</h4><table>${al.map(a=>tr(esc(a.t),'<small>'+esc(a.d)+'</small>')).join('')}</table>`:''}</div>`;
+  return h;
+}
+
+
+// ---------- RECIBO DA OFICINA ----------
+let RCB=null;
+function abreRecibo(i,j){RCB={i,j};ir('recibo')}
+function vRecibo(){
+  if(!RCB||!D.pagamento||!D.pagamento[RCB.i])return '<p class="mut">Escolha uma oficina em Pagamento.</p>';
+  const b=D.pagamento[RCB.i],o=b.oficinas[RCB.j],E=b.entregas.filter(e=>norm(e.oficina)===norm(o.oficina));
+  const txt=`*Recibo LOGARI — ${o.oficina}*\nSemana ${b.periodo}\n\n${E.map(e=>`${dbr(e.data)} · ${e.modelo} · ${n0(e.qtd)} pçs × ${brl(e.valor)} = ${brl(e.qtd*e.valor)}${e.vale?' (vale '+brl(e.vale)+')':''}`).join('\n')}\n\nTotal: ${n0(o.pecas)} peças · ${brl(o.bruto)}\nVales: ${brl(o.vales)}\n*A pagar: ${brl(o.apagar)}*${o.pago?'\n✅ PAGO':''}`;
+  return `<div class="noprint"><button class="tog" style="margin-bottom:12px" onclick="ir('pagamento')">‹ Pagamento</button>
+  <div class="grid2"><button class="btn" style="margin:0" onclick="window.print()">📄 PDF</button><a class="btn" style="margin:0;text-align:center;text-decoration:none;background:#25d366;color:#08240f" href="https://wa.me/?text=${encodeURIComponent(txt)}" target="_blank">WhatsApp</a></div><p></p></div>
+  <div class="paper"><div class="ph"><div><h3>LOGARI</h3><small>Recibo de serviço de costura</small></div><div style="text-align:right"><b>${esc(o.oficina)}</b><br><small>Semana ${esc(b.periodo)}</small></div></div>
+  <table><tr><th style="text-align:left">Data</th><th style="text-align:left">Modelo</th><th>Peças</th><th>R$/pç</th><th>Total</th><th>Vale</th></tr>
+  ${E.map(e=>`<tr><td>${dbr(e.data)}</td><td>${esc(e.modelo)}</td><td style="text-align:right">${n0(e.qtd)}</td><td style="text-align:right">${brl(e.valor)}</td><td style="text-align:right">${brl(e.qtd*e.valor)}</td><td style="text-align:right">${e.vale?brl(e.vale):'—'}</td></tr>`).join('')}</table>
+  <table style="margin-top:12px">${[['Total de peças',n0(o.pecas)],['Valor bruto',brl(o.bruto)],['Vales já pagos',brl(o.vales)]].map(([a,v])=>`<tr><td>${a}</td><td style="text-align:right">${v}</td></tr>`).join('')}<tr><td><b>A pagar</b></td><td style="text-align:right"><b style="font-size:18px">${brl(o.apagar)}</b></td></tr></table>
+  ${o.pago?'<p style="text-align:center;font-weight:800;color:#2f6a26;margin-top:14px">✓ PAGO</p>':''}
+  <div class="ass"><div>LOGARI</div><div>${esc(o.oficina)}</div></div></div>`;
+}
 
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
 (function(){const p=getStore('est_pin');if(p){$('#pin').value=p;entrar()}$('#pin').addEventListener('keydown',e=>{if(e.key==='Enter')entrar()})})();
