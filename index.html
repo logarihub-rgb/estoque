@@ -11,17 +11,17 @@
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <style>
 
 :root{--bg:#0f0e0d;--card:#1a1815;--card2:#221f1b;--ink:#ece4d4;--mut:#9a907c;--line:#2e2a24;--acc:#b8904f;--acc-ink:#15120e;--ok:#8fae6b;--warn:#d6a74a;--bad:#c4553b;--r:12px;--serif:"Playfair Display",Georgia,serif}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;color:var(--ink);font:15px/1.45 Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:var(--bg)}
+html,body{font-feature-settings:"lnum" 1;margin:0;color:var(--ink);font:15px/1.45 Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:var(--bg)}
 body{background:
  repeating-linear-gradient(45deg,rgba(255,255,255,.012) 0 2px,transparent 2px 6px),
  repeating-linear-gradient(-45deg,rgba(0,0,0,.25) 0 2px,transparent 2px 6px),
- radial-gradient(ellipse at top,#1d1a16 0%,#0f0e0d 60%);background-attachment:fixed;min-height:100vh}
-header{position:sticky;top:0;z-index:5;background:rgba(12,11,10,.96);backdrop-filter:blur(6px);color:var(--ink);padding:calc(12px + env(safe-area-inset-top)) 16px 10px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--acc)}
+ radial-gradient(ellipse at top,#1d1a16 0%,#0f0e0d 60%);background-repeat:no-repeat;background-color:var(--bg);min-height:100vh}
+header{position:sticky;top:0;z-index:5;background:#0c0b0a;color:var(--ink);padding:calc(12px + env(safe-area-inset-top)) 16px 10px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--acc)}
 header h1{margin:0;font:800 20px/1 var(--serif);letter-spacing:4px;text-transform:uppercase;color:var(--acc)}
 header small{color:var(--mut);font-size:11px;letter-spacing:.5px}
 main{padding:14px 12px 100px;max-width:640px;margin:0 auto}
@@ -151,6 +151,60 @@ nav button{position:relative}nav .bdg{position:absolute;top:4px;left:calc(50% + 
 .ib{background:var(--card);border:1px solid var(--line);border-radius:8px;color:var(--acc);font:inherit;font-size:16px;padding:0 12px;height:42px}
 .mg{display:grid;grid-template-columns:1fr 1fr;gap:10px}.mi{position:relative;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 8px 14px;text-align:center;color:var(--ink);font:inherit}.mi i{display:block;font-style:normal;font-size:24px;margin-bottom:6px}.mi b{font-size:13.5px;font-weight:600}.mi .bd{position:absolute;top:7px;right:8px;background:#b5432c;color:#fff;border-radius:9px;font-size:10.5px;padding:1px 6px;font-weight:700}
 .mnav{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}.mnav button{background:none;border:1px solid var(--line);color:var(--acc);border-radius:6px;padding:6px 12px;font:inherit;font-size:16px}
+
+/* confirm layer */
+#cfm .sheet{z-index:45}
+.btn.bad{background:#7a2a1c;border-color:#9a3a26;color:#fbe4da}
+/* painel v2 */
+.hero{background:linear-gradient(160deg,#2a241b,#171410 70%);border:1px solid #4a3d28;border-radius:16px;padding:16px;margin-bottom:10px}
+.hero .hl{font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:1.4px}
+.hero .num{font:800 42px/1 var(--serif);color:var(--ink);margin:6px 0 2px}
+.hero .sub{font-size:13px;color:var(--mut)}
+.hero .cov{display:flex;justify-content:space-between;font-size:12px;color:var(--mut);margin-top:12px}
+.gauge{position:relative;height:8px;border-radius:4px;background:linear-gradient(90deg,#7a2a1c 0 23%,#6b5320 23% 50%,#3c5a2a 50% 100%);margin-top:6px}
+.gauge i{position:absolute;top:-4px;width:4px;height:16px;border-radius:2px;background:var(--ink);box-shadow:0 0 0 2px #0f0e0d}
+.sec-t{display:flex;justify-content:space-between;align-items:center;margin:18px 4px 8px}
+.sec-t span{font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:1.4px}
+.sec-t button{background:none;border:0;color:var(--acc);font:inherit;font-size:12.5px;padding:0}
+.todo{display:flex;align-items:center;gap:10px;width:100%;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 12px;margin-bottom:7px;color:var(--ink);font:inherit;text-align:left}
+.todo .ic{width:36px;height:36px;border-radius:10px;flex:none;display:flex;align-items:center;justify-content:center;font:800 15px var(--serif)}
+.todo .tx{flex:1;min-width:0}.todo .tx b{display:block;font-size:14.5px}.todo .tx small{color:var(--mut);font-size:12px}
+.todo .ar{color:var(--mut);font-size:18px}
+.ic.s-ZERADO{background:#3a1410;color:#ff8a65}.ic.s-REPOR{background:#33180f;color:#f5916b}.ic.s-ATENCAO{background:#2e2410;color:var(--warn)}.ic.s-OK{background:#1d2716;color:var(--ok)}
+.cm{display:grid;grid-template-columns:78px 1fr 64px;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line);font-size:13.5px}.cm:last-child{border:0}
+.cm .t{height:8px;background:#2a2620;border-radius:4px;overflow:hidden}.cm .t i{display:block;height:100%;border-radius:4px}
+.cm b{font-family:var(--serif)}.cm .d{text-align:right;font-weight:700}
+.minibars{display:flex;align-items:flex-end;gap:4px;height:54px;margin-top:10px}.minibars div{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;height:100%;justify-content:flex-end}.minibars i{width:100%;background:var(--acc);border-radius:3px 3px 0 0;min-height:2px}.minibars small{font-size:9.5px;color:var(--mut)}
+.qa{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:4px}.qa button{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 4px;color:var(--ink);font:inherit;font-size:12px}.qa i{display:block;font-style:normal;font-size:20px;margin-bottom:4px}
+/* estoque v2 */
+.sumbar{display:flex;gap:8px;margin-bottom:10px}.sumbar div{flex:1;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px}.sumbar b{display:block;font:800 22px var(--serif)}.sumbar small{font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:1px}
+.mc{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:10px}
+.mc .hd{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px}
+.mc .hd b{font:800 19px var(--serif)}.mc .hd b small{font:600 12px Inter,sans-serif;color:var(--acc);margin-left:6px;letter-spacing:1px}
+.mc .hd span{font-size:12px;color:var(--mut)}
+.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.tile{border:1px solid var(--line);border-radius:10px;padding:8px 4px 7px;text-align:center;background:#141210;color:var(--ink);font:inherit;position:relative}
+.tile .cn{display:flex;align-items:center;justify-content:center;gap:4px;font-size:10.5px;color:var(--mut);text-transform:uppercase;letter-spacing:.5px}
+.tile .q{display:block;font:800 22px/1.15 var(--serif);margin-top:3px}
+.tile .dd{display:block;font-size:10.5px;color:var(--mut)}
+.tile.s-ZERADO{background:#2a1110;border-color:#7a2a1c}.tile.s-ZERADO .q,.tile.s-REPOR .q{color:#ff8a65}
+.tile.s-REPOR{background:#24140e;border-color:#6a2f20}
+.tile.s-ATENCAO{background:#221b0e;border-color:#5a4724}.tile.s-ATENCAO .q{color:var(--warn)}
+.tile.s-FORA{opacity:.45}
+.tile .of{display:block;font-size:9.5px;color:var(--acc);margin-top:1px}
+.tile.vz{opacity:.25}
+.leg{display:flex;gap:12px;justify-content:center;font-size:11px;color:var(--mut);margin:4px 0 12px}.leg i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:4px;vertical-align:-1px}
+/* assistente */
+.chat{display:flex;flex-direction:column;gap:8px;padding-bottom:130px}
+.msg{max-width:88%;padding:10px 12px;border-radius:14px;font-size:14px;line-height:1.45;white-space:normal}
+.msg.eu{align-self:flex-end;background:var(--acc);color:var(--acc-ink);border-bottom-right-radius:4px;font-weight:600}
+.msg.bot{align-self:flex-start;background:var(--card);border:1px solid var(--line);border-bottom-left-radius:4px}
+.msg.bot .ln{display:flex;justify-content:space-between;gap:10px;padding:4px 0;border-bottom:1px solid var(--line);font-size:13.5px}.msg.bot .ln:last-child{border:0}
+.msg.bot .ln.go{cursor:pointer}
+.msg.bot h4{margin:0 0 6px;font:800 15px var(--serif);color:var(--acc)}
+.cbar{position:fixed;left:0;right:0;bottom:calc(58px + env(safe-area-inset-bottom));z-index:6;background:#0c0b0a;border-top:1px solid var(--line);padding:8px 10px}
+.cbar .sg{display:flex;gap:6px;overflow-x:auto;margin-bottom:8px}.cbar .sg button{flex:none;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:16px;padding:6px 11px;font:inherit;font-size:12.5px}
+.cbar form{display:flex;gap:8px;max-width:640px;margin:0 auto}.cbar input{flex:1;border-radius:22px;padding:11px 16px}.cbar form button{border:0;border-radius:22px;background:var(--acc);color:var(--acc-ink);font:inherit;font-weight:700;padding:0 16px}
 </style>
 </head>
 <body>
@@ -169,11 +223,12 @@ nav button{position:relative}nav .bdg{position:absolute;top:4px;left:calc(50% + 
     <button data-t="painel" onclick="ir('painel')"><svg viewBox="0 0 24 24"><path d="M3 13h8V3H3zM13 21h8V11h-8zM3 21h8v-6H3zM13 3v6h8V3z"/></svg>Painel</button>
     <button data-t="estoque" onclick="ir('estoque')"><svg viewBox="0 0 24 24"><path d="M3 7l9-4 9 4-9 4zM3 7v10l9 4 9-4V7M12 11v10"/></svg>Estoque</button>
     <button data-t="producao" onclick="ir('producao')"><svg viewBox="0 0 24 24"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4L8.1 15.9M14.5 14.5L20 20M8.1 8.1L12 12"/></svg>Produção</button>
+    <button data-t="assist" onclick="ir('assist')"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/><path d="M8 10h.01M12 10h.01M16 10h.01"/></svg>Assistente</button>
     <button data-t="entregas" onclick="ir('entregas')"><svg viewBox="0 0 24 24"><path d="M3 7h12v10H3zM15 10h4l2 3v4h-6M7 20a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM17 20a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"/></svg>Entregas</button>
     <button data-t="mais" onclick="ir('mais')"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg>Mais<span id="bdg"></span></button>
   </nav>
 </div>
-<div id="modal"></div>
+<div id="modal"></div><div id="cfm"></div>
 <script>
 const API='https://script.google.com/macros/s/AKfycbxjWT6DQ8x0DDpiM90QPeMKbzM9Na9yrV9I9Bj7ushiWNXoiAdPK_FuQ59IovZHwVpDEw/exec';
 const CORES=['Preto','Azul','Marrom','Branco'];
@@ -208,7 +263,7 @@ async function carregar(force){
   catch(e){if(/PIN/.test(e.message)){store('est_pin');store(CK());location.reload();return}toast(D?'Sem conexão — mostrando dados salvos':e.message)}
   finally{CARR=false;sync(false);loading(false);processaFila()}
 }
-function setD(d,doCache){D=d;if(!doCache)store(CK(),JSON.stringify(d));$('#sub').textContent=d.user.nome+' · '+d.atualizado.slice(-5);render()}
+function setD(d,doCache){D=d;if(!doCache){store(CK(),JSON.stringify(d));store('est_t',String(Date.now()))}$('#sub').textContent=d.user.nome+' · '+d.atualizado.slice(-5);render()}
 // fila de lançamentos: salva na hora no celular e envia por trás
 function fila(){try{return JSON.parse(getStore('est_fila')||'[]')}catch(e){return[]}}
 function setFila(f){store('est_fila',f.length?JSON.stringify(f):undefined)}
@@ -222,14 +277,24 @@ async function processaFila(){
   ENV=false;sync(false);render();
 }
 function acao(a,p,otimista){const f=fila();f.push({a,p,t:Date.now()});setFila(f);close_();if(otimista)otimista();toast('Salvando…');render();processaFila()}
-function vFila(){const f=fila();if(!f.length)return'';const err=f.find(x=>x.erro);return`<div class="fila"><span>${f.length} lançamento${f.length>1?'s':''} ${err?'não enviado — '+esc(err.erro):'sendo salvo…'}</span>${err?`<span><button onclick="processaFila()">Tentar de novo</button> <button style="background:none;color:#f0b48a;border:1px solid #6a2f20" onclick="if(confirm('Descartar os lançamentos pendentes?')){setFila([]);carregar(true)}">Descartar</button></span>`:''}</div>`}
+function vFila(){const f=fila();if(!f.length)return'';const err=f.find(x=>x.erro);return`<div class="fila"><span>${f.length} lançamento${f.length>1?'s':''} ${err?'não enviado — '+esc(err.erro):'sendo salvo…'}</span>${err?`<span><button onclick="processaFila()">Tentar de novo</button> <button style="background:none;color:#f0b48a;border:1px solid #6a2f20" onclick="pergunta('Descartar os lançamentos pendentes?','Descartar',true).then(ok=>{if(ok){setFila([]);carregar(true)}})">Descartar</button></span>`:''}</div>`}
 function ir(t){TAB=t;window.scrollTo(0,0);render()}
-const VIEWS={planejar:()=>vPlanejar(),oficinas:()=>vOficinas(),tecido:()=>vTecido(),relatorio:()=>vRelatorio(),etiquetas:()=>vEtiquetas(),usuarios:()=>vUsuarios(),historico:()=>vHistorico(),recibo:()=>vRecibo(),painel:()=>vPainel(),estoque:()=>vEstoque(),producao:()=>vProducao(),entregas:()=>vEntregas(),mais:()=>vMais(),alertas:()=>vAlertas(),vendas:()=>vVendas(),resumo:()=>vResumo(),pagamento:()=>vPagamento()};
+const VIEWS={assist:()=>vAssist(),planejar:()=>vPlanejar(),oficinas:()=>vOficinas(),tecido:()=>vTecido(),relatorio:()=>vRelatorio(),etiquetas:()=>vEtiquetas(),usuarios:()=>vUsuarios(),historico:()=>vHistorico(),recibo:()=>vRecibo(),painel:()=>vPainel(),estoque:()=>vEstoque(),producao:()=>vProducao(),entregas:()=>vEntregas(),mais:()=>vMais(),alertas:()=>vAlertas(),vendas:()=>vVendas(),resumo:()=>vResumo(),pagamento:()=>vPagamento()};
 const NAVOF={planejar:'mais',oficinas:'mais',tecido:'mais',relatorio:'mais',etiquetas:'mais',usuarios:'mais',historico:'mais',recibo:'mais',alertas:'mais',vendas:'mais',resumo:'mais',pagamento:'mais'};
 function render(){if(!D)return;const nt=NAVOF[TAB]||TAB;document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.t===nt));
   const na=alertas().filter(a=>a.n>=3).length;$('#bdg').innerHTML=na?`<span class="bdg">${na}</span>`:'';
   let h='';try{h=VIEWS[TAB]()}catch(e){h='<p class="mut">Erro ao montar a tela: '+esc(e.message)+'</p>'}
+  if(TAB==='assist'){$('#view').innerHTML=vFila()+h;fimChat();return}
   $('#view').innerHTML=vFila()+(NAVOF[TAB]&&TAB!=='recibo'?`<button class="tog noprint" style="margin-bottom:12px" onclick="ir('mais')">‹ Voltar</button>`:'')+h}
+
+// diálogos próprios (o confirm/prompt do celular pode ser bloqueado no app instalado)
+function pergunta(msg,sim,perigo){return new Promise(res=>{const el=$('#cfm');
+  el.innerHTML=`<div class="sheet" id="cfmb"><div><h2>Confirmar</h2><p style="font-size:15px;margin:4px 0 0">${esc(msg)}</p><button class="btn${perigo?' bad':''}" id="cfok">${esc(sim||'Confirmar')}</button><button class="btn sec" id="cfno">Cancelar</button></div></div>`;
+  const fim=v=>{el.innerHTML='';res(v)};$('#cfok').onclick=()=>fim(true);$('#cfno').onclick=()=>fim(false);$('#cfmb').onclick=e=>{if(e.target.id==='cfmb')fim(false)}})}
+function pedeValor(msg,ini){return new Promise(res=>{const el=$('#cfm');
+  el.innerHTML=`<div class="sheet" id="cfmb"><div><h2>Valor</h2><p style="font-size:14px;margin:4px 0 10px">${esc(msg)}</p><input id="cfv" inputmode="decimal" value="${esc(ini==null?'':ini)}"><button class="btn" id="cfok">Salvar</button><button class="btn sec" id="cfno">Cancelar</button></div></div>`;
+  const fim=v=>{el.innerHTML='';res(v)};$('#cfok').onclick=()=>fim($('#cfv').value);$('#cfno').onclick=()=>fim(null);$('#cfv').onkeydown=e=>{if(e.key==='Enter')fim($('#cfv').value)};setTimeout(()=>{const i=$('#cfv');if(i){i.focus();i.select()}},60)})}
+function sair(){pergunta('Sair deste celular?','Sair',true).then(ok=>{if(ok){store('est_pin');store(CK());location.reload()}})}
 function open_(h){$('#modal').innerHTML=`<div class="sheet" onclick="if(event.target===this)close_()"><div>${h}<button class="btn sec" onclick="close_()">Fechar</button></div></div>`}
 function close_(){$('#modal').innerHTML=''}
 const val=id=>$('#'+id).value;
@@ -245,37 +310,164 @@ function sugerePiranha(){
   return Object.values(by).sort((a,b)=>b.sc-a.sc).slice(0,4).map(o=>o.x);
 }
 
-/* ---------- PAINEL ---------- */
-function vPainel(){
-  const A=ativos(),est=A.reduce((s,x)=>s+x.estoque,0),prod=A.reduce((s,x)=>s+x.producao,0),med=A.reduce((s,x)=>s+x.media,0),mes=D.estoque.reduce((s,x)=>s+x.mes,0),dono=D.user.dono;
-  const kp=(k,v,sub)=>`<div class="card"><div class="k">${k}</div><div class="mid">${v}</div>${sub?`<div class="mut" style="font-size:12px">${sub}</div>`:''}</div>`;
-  const cnt=k=>A.filter(x=>stk(x.status)===k).length;
-  let h=`<div class="grid2">${kp('Em estoque',n0(est),'+'+n0(prod)+' na oficina')}${kp('Cobertura',n0(med?est/med:0)+' dias',n0(med)+' por dia')}${kp('Vendas no mês',n0(mes))}${dono?kp('Valor em estoque',brl(D.estoque.reduce((s,x)=>s+(x.valor||0),0))):kp('SKUs ativos',A.length)}</div>
-  <div class="stt">${[['ZERADO','Zerados','#f07a55'],['REPOR','Repor','#f07a55'],['ATENCAO','Atenção','var(--warn)'],['OK','OK','var(--ok)']].map(([k,t,c])=>`<button onclick="FS='${k==='OK'?'Todos':'FALTA'}';ir('estoque')"><b style="color:${c}">${cnt(k)}</b>${t}</button>`).join('')}</div>`;
-  const urg=A.filter(x=>['ZERADO','REPOR','ATENCAO'].includes(stk(x.status))).sort((a,b)=>(a.dias??-1)-(b.dias??-1));
-  h+=`<div class="card"><div class="row sp"><div class="k">O que fazer agora</div>${urg.length>5?`<button class="tog" style="min-width:0;padding:4px 9px" onclick="ir('alertas')">Ver todos (${urg.length})</button>`:''}</div>`;
-  h+=urg.length?urg.slice(0,5).map(x=>`<button class="lin" onclick="detSku('${x.sku}')"><span><b>${esc(x.modelo)} ${tamCurto(x.tam)}</b> ${esc(x.cor)}</span><span>${x.sugestao?`<span class="mut" style="font-size:12px">produzir ${n0(x.sugestao)}</span> `:''}<span class="pill st-${stk(x.status)}">${n0(x.estoque)}</span></span></button>`).join(''):'<p class="mut" style="margin:6px 0 0">Tudo OK.</p>';
-  h+='</div>';
-  const pir=D.estoque.filter(x=>x.piranha),cfg=D.config||{};let prox='';if(cfg.ultimaPiranha&&cfg.cicloPiranha)prox=dbr(addDias(cfg.ultimaPiranha,cfg.cicloPiranha));
-  h+=`<button class="lin" style="border:1px solid var(--line);border-radius:10px;padding:12px;background:var(--card)" onclick="detPiranha()"><span>🐟 <b>Piranha</b> <span class="mut">${pir.length?pir.map(x=>esc(x.modelo)+' '+tamCurto(x.tam)+' '+esc(x.cor)).join(', '):'nenhuma'}</span></span><span class="mut" style="font-size:12px;white-space:nowrap">${prox?'troca '+prox:''} ›</span></button>`;
-  return h;
-}
 function detPiranha(){const pir=D.estoque.filter(x=>x.piranha);
   open_(`<h2>🐟 Piranha</h2><div class="k">Atuais</div>${pir.map(x=>`<div class="row sp" style="font-size:14px;margin:6px 0"><span>${esc(x.modelo)} ${tamCurto(x.tam)} ${esc(x.cor)}</span><span class="mut">${n0(x.estoque)} est. · ${n1(x.media)}/dia</span></div>`).join('')||'<p class="mut">Nenhuma marcada</p>'}
   <div class="k" style="margin-top:14px">Sugestão para a próxima troca</div>${sugerePiranha().map(x=>`<div class="row sp" style="font-size:14px;margin:6px 0"><span>${esc(x.modelo)} ${tamCurto(x.tam)} ${esc(x.cor)}</span><span class="mut">${n0(x.estoque)} est. · ${n1(x.media)}/dia</span></div>`).join('')}`)}
 
+/* ---------- PAINEL ---------- */
+const soma=(l,f)=>l.reduce((s,x)=>s+(+f(x)||0),0);
+const corDias=d=>d==null?'var(--mut)':d<7?'#ff8a65':d<15?'var(--warn)':'var(--ok)';
+const ehFalta=x=>['ZERADO','REPOR','ATENCAO'].includes(stk(x.status));
+function vPainel(){
+  const A=ativos(),dono=D.user.dono,est=soma(A,x=>x.estoque),prod=soma(A,x=>x.producao),med=soma(A,x=>x.media),mes=soma(D.estoque,x=>x.mes);
+  const cob=med?est/med:0,pos=Math.min(98,cob/30*100);
+  const cnt=k=>A.filter(x=>stk(x.status)===k).length;
+  let h=`<div class="hero"><div class="row sp"><span class="hl">Estoque pronto</span><span class="hl">${n0(mes)} vendidas no mês</span></div>
+  <div class="num">${n0(est)} <span style="font:600 15px Inter,sans-serif;color:var(--mut)">peças</span></div>
+  <div class="sub">+${n0(prod)} na oficina · vendendo ${n0(med)} por dia${dono?' · '+brl(soma(D.estoque,x=>x.valor))+' em custo':''}</div>
+  <div class="cov"><span>Cobertura</span><b style="color:${corDias(cob)};font-size:14px">${n0(cob)} dias</b></div>
+  <div class="gauge"><i style="left:${pos}%"></i></div><div class="row sp mut" style="font-size:10px;margin-top:4px"><span>0</span><span style="margin-left:14%">7</span><span style="margin-left:10%">15</span><span>30+ dias</span></div></div>`;
+  h+=`<div class="stt">${[['ZERADO','Zerados','#ff8a65'],['REPOR','Repor','#f5916b'],['ATENCAO','Atenção','var(--warn)'],['OK','OK','var(--ok)']].map(([k,t,c])=>`<button onclick="FS='${k==='OK'?'Todos':'FALTA'}';FMOD='Todos';ir('estoque')"><b style="color:${c}">${cnt(k)}</b>${t}</button>`).join('')}</div>`;
+  // o que fazer agora
+  const urg=A.filter(ehFalta).sort((a,b)=>(a.dias??-1)-(b.dias??-1));
+  h+=`<div class="sec-t"><span>O que fazer agora</span>${urg.length>5?`<button onclick="ir('alertas')">Ver todos (${urg.length}) ›</button>`:''}</div>`;
+  h+=urg.length?urg.slice(0,5).map(x=>{const k=stk(x.status);return `<button class="todo" onclick="detSku('${x.sku}')"><span class="ic s-${k}">${n0(x.estoque)}</span><span class="tx"><b>${esc(x.modelo)} ${tamCurto(x.tam)} · ${esc(x.cor)}</b><small>${k==='ZERADO'?(x.producao?n0(x.producao)+' na oficina — cobrar entrega':'zerado, nada na oficina'):(x.dias==null?'—':n0(x.dias)+' dias de estoque')}${x.sugestao?' · produzir '+n0(x.sugestao):''}</small></span><span class="ar">›</span></button>`}).join(''):'<div class="todo"><span class="ic s-OK">✓</span><span class="tx"><b>Tudo em dia</b><small>Nenhum SKU faltando</small></span></div>';
+  if(dono&&D.pagamento){const ab=pagAberto();if(ab)h+=`<button class="todo" onclick="ir('pagamento')"><span class="ic s-ATENCAO">R$</span><span class="tx"><b>Pagar oficinas: ${brl(ab)}</b><small>Toque para ver e marcar como pago</small></span><span class="ar">›</span></button>`}
+  // vendas 7 dias
+  const p=vendasPer(7),ant=vendasRange(addDias(p.ini,-7),addDias(p.ini,-1)),ta=soma(ant,r=>r[2]),vr=ta?(p.tot/ta-1)*100:null;
+  const by={};p.L.forEach(r=>by[r[0]]=(by[r[0]]||0)+r[2]);const dias=[];for(let d=p.ini;d<=p.fim;d=addDias(d,1))dias.push(d);const mx=Math.max(1,...dias.map(d=>by[d]||0));
+  const SEM=['D','S','T','Q','Q','S','S'];
+  h+=`<div class="sec-t"><span>Vendas · últimos 7 dias</span><button onclick="ir('vendas')">Detalhes ›</button></div><div class="card"><div class="row sp"><span class="big" style="font-size:26px">${n0(p.tot)}</span><span style="font-size:12.5px;color:${vr==null?'var(--mut)':vr>=0?'var(--ok)':'#ff8a65'}">${vr==null?'':(vr>=0?'▲ ':'▼ ')+n1(Math.abs(vr))+'% vs semana anterior'}</span></div>
+  <div class="minibars">${dias.map(d=>`<div><i style="height:${(by[d]||0)/mx*100}%"></i><small>${SEM[new Date(d+'T12:00').getDay()]}</small></div>`).join('')}</div></div>`;
+  // cobertura por modelo
+  const mods={};A.forEach(x=>{const m=mods[x.modelo]=mods[x.modelo]||{e:0,m:0};m.e+=x.estoque;m.m+=x.media});
+  const lm=Object.entries(mods).map(([k,v])=>({k,e:v.e,d:v.m?v.e/v.m:null})).sort((a,b)=>(a.d??999)-(b.d??999));
+  h+=`<div class="sec-t"><span>Cobertura por modelo</span><button onclick="ir('planejar')">Planejar corte ›</button></div><div class="card">${lm.map(o=>`<div class="cm" onclick="FMOD='${esc(o.k)}';FS='Todos';ir('estoque')"><b>${esc(o.k)}</b><div class="t"><i style="width:${o.d==null?0:Math.min(100,o.d/30*100)}%;background:${corDias(o.d)}"></i></div><span class="d" style="color:${corDias(o.d)}">${o.d==null?'—':n0(o.d)+'d'}</span></div>`).join('')}</div>`;
+  const pir=D.estoque.filter(x=>x.piranha),cfg=D.config||{};let prox='';if(cfg.ultimaPiranha&&cfg.cicloPiranha)prox=dbr(addDias(cfg.ultimaPiranha,cfg.cicloPiranha));
+  h+=`<button class="todo" style="margin-top:10px" onclick="detPiranha()"><span class="ic" style="background:#16222a">🐟</span><span class="tx"><b>Piranha</b><small>${pir.length?pir.map(x=>esc(x.modelo)+' '+tamCurto(x.tam)+' '+esc(x.cor)).join(', '):'nenhuma'}${prox?' · troca '+prox:''}</small></span><span class="ar">›</span></button>`;
+  h+=`<div class="qa"><button onclick="ir('entregas');setTimeout(fEntrega,0)"><i>🚚</i>Lançar entrega</button><button onclick="ir('producao');setTimeout(fLote,0)"><i>✂️</i>Novo lote</button><button onclick="ir('assist')"><i>💬</i>Assistente</button></div>`;
+  return h;
+}
+
 /* ---------- ESTOQUE ---------- */
+let FMOD='Todos';
 function vEstoque(){
-  const nf=ativos().filter(x=>['ZERADO','REPOR','ATENCAO'].includes(stk(x.status))).length;
-  return `<div class="row" style="gap:6px;margin-bottom:10px"><input class="sbox" style="margin:0;flex:1" placeholder="Buscar" value="${esc(Q)}" oninput="buscaQ(this.value)"><button class="ib" aria-label="Ler etiqueta" onclick="lerQR(v=>{const x=skuPorQR(v);x?detSku(x.sku):toast('Etiqueta não reconhecida')})">📷</button><button class="ib" aria-label="Ajuste" onclick="fAjuste()">±</button></div>
-  <div class="chips"><button class="${FS!=='FALTA'?'on':''}" onclick="FS='Todos';render()">Tudo</button><button class="${FS==='FALTA'?'on':''}" onclick="FS='FALTA';render()">Faltando ${nf}</button></div>
-  <div class="card" style="padding:10px 12px" id="elist">${listaEstoque()}</div>`;
+  const A=ativos(),nf=A.filter(ehFalta).length,mods=[...new Set(A.map(x=>x.modelo))];
+  return `<div class="row" style="gap:6px;margin-bottom:10px"><input class="sbox" style="margin:0;flex:1" placeholder="Buscar modelo, cor…" value="${esc(Q)}" oninput="buscaQ(this.value)"><button class="ib" aria-label="Ler etiqueta" onclick="lerQR(v=>{const x=skuPorQR(v);x?detSku(x.sku):toast('Etiqueta não reconhecida')})">📷</button><button class="ib" aria-label="Ajuste" onclick="fAjuste()">±</button></div>
+  <div class="sumbar"><div><small>Prontas</small><b>${n0(soma(A,x=>x.estoque))}</b></div><div><small>Na oficina</small><b>${n0(soma(A,x=>x.producao))}</b></div><div><small>Faltando</small><b style="color:${nf?'#ff8a65':'var(--ok)'}">${nf}</b></div></div>
+  <div class="chips"><button class="${FS!=='FALTA'&&FMOD==='Todos'?'on':''}" onclick="FS='Todos';FMOD='Todos';render()">Tudo</button><button class="${FS==='FALTA'?'on':''}" onclick="FS=FS==='FALTA'?'Todos':'FALTA';render()">Faltando ${nf}</button>${mods.map(m=>`<button class="${FMOD===m?'on':''}" onclick="FMOD=FMOD==='${esc(m)}'?'Todos':'${esc(m)}';render()">${esc(m)}</button>`).join('')}</div>
+  <div id="elist">${listaEstoque()}</div>
+  <div class="leg"><span><i style="background:#7a2a1c"></i>Zerado/repor</span><span><i style="background:#5a4724"></i>Atenção</span><span><i style="background:#2e2a24"></i>OK</span><span style="color:var(--acc)">+n na oficina</span></div>`;
 }
 function listaEstoque(){
-  const l=filtraQ(D.estoque.filter(x=>(x.ativo||x.estoque>0)&&(FS!=='FALTA'||['ZERADO','REPOR','ATENCAO'].includes(stk(x.status)))));
-  if(!l.length)return '<p class="mut" style="margin:4px 0">Nada encontrado.</p>';
-  return `<div class="er hd"><span></span>${CORES.map(c=>`<span>${c}</span>`).join('')}</div>`+grupos(l).map(g=>`<div class="er"><span class="en">${esc(g.modelo)} ${tamCurto(g.tam)}</span>${CORES.map(c=>{const x=g.itens[c];return x?`<span class="ev s-${stk(x.status)}" onclick="detSku('${x.sku}')">${n0(x.estoque)}</span>`:'<span class="ev mut">–</span>'}).join('')}</div>`).join('');
+  const l=filtraQ(D.estoque.filter(x=>(x.ativo||x.estoque>0)&&(FS!=='FALTA'||ehFalta(x))&&(FMOD==='Todos'||x.modelo===FMOD)));
+  if(!l.length)return '<p class="mut" style="margin:4px">Nada encontrado.</p>';
+  return grupos(l).map(g=>{const it=Object.values(g.itens),e=soma(it,x=>x.estoque),m=soma(it,x=>x.media),d=m?e/m:null;
+    return `<div class="mc"><div class="hd"><b>${esc(g.modelo)}<small>${esc(tamCurto(g.tam))}</small></b><span>${n0(e)} pçs${d!=null?` · <span style="color:${corDias(d)}">${n0(d)} dias</span>`:''}</span></div><div class="tiles">${CORES.map(c=>{const x=g.itens[c];
+      if(!x)return `<div class="tile vz"><span class="cn">${c}</span><span class="q">–</span><span class="dd">&nbsp;</span></div>`;
+      return `<button class="tile s-${stk(x.status)}" onclick="detSku('${x.sku}')"><span class="cn"><span class="dot" style="background:${COR_HEX[c]};width:8px;height:8px"></span>${c}</span><span class="q">${n0(x.estoque)}</span><span class="dd">${x.dias==null?'—':n0(x.dias)+' dias'}</span>${x.producao?`<span class="of">+${n0(x.producao)} oficina</span>`:''}</button>`}).join('')}</div></div>`}).join('');
 }
+
+/* ---------- ASSISTENTE (responde na hora, com os dados já carregados) ---------- */
+let CH=null;
+function chLoad(){if(CH)return;try{CH=JSON.parse(getStore('est_chat_'+PIN)||'[]')}catch(e){CH=[]}}
+function chSave(){store('est_chat_'+PIN,JSON.stringify(CH.slice(-40)))}
+function sugestoes(){return ['O que falta?','Alertas','Próximo corte','Vendas de ontem','Vendas 7 dias','Mais vendidos','Parados','Lotes na oficina'].concat(D.user.dono?['Quanto devo às oficinas?']:[]).concat(['Piranha','Limpar conversa'])}
+function vAssist(){chLoad();
+  let h='<div class="chat" id="chat">';
+  if(!CH.length)h+=`<div class="msg bot"><h4>Assistente do estoque</h4>Pergunte do seu jeito. Exemplos:<br>• <b>quanto tem de malta preto r1</b><br>• <b>o que falta</b> ou <b>o que falta de mulc</b><br>• <b>próximo corte</b><br>• <b>vendas de ontem</b>, <b>vendas 15 dias de ret</b><br>• <b>lotes na oficina</b>${D.user.dono?'<br>• <b>quanto devo às oficinas</b>':''}</div>`;
+  h+=CH.map(m=>`<div class="msg ${m.eu?'eu':'bot'}">${m.eu?esc(m.t):m.h}</div>`).join('')+'</div>';
+  h+=`<div class="cbar"><div class="sg">${sugestoes().map(t=>`<button onclick="pergAssist('${t}')">${t}</button>`).join('')}</div><form onsubmit="event.preventDefault();const i=$('#cq');const v=i.value;i.value='';pergAssist(v)"><input id="cq" placeholder="Pergunte algo…" autocomplete="off" enterkeyhint="send"><button>Enviar</button></form></div>`;
+  return h;
+}
+function fimChat(){requestAnimationFrame(()=>window.scrollTo(0,document.body.scrollHeight))}
+function pergAssist(t){t=String(t||'').trim();if(!t)return;chLoad();
+  if(/^limpar( conversa)?$/i.test(t)){CH=[];chSave();render();return}
+  let r;try{r=responde(t)}catch(e){r='Não consegui montar a resposta ('+esc(e.message)+').'}
+  CH.push({eu:1,t});CH.push({h:r});chSave();render()}
+const lnA=(a,b,go)=>`<div class="ln${go?' go':''}"${go?` onclick="${go}"`:''}><span>${a}</span><span style="text-align:right;white-space:nowrap">${b||''}</span></div>`;
+const nomeX=x=>`<span class="dot" style="background:${COR_HEX[x.cor]||'#888'};width:9px;height:9px"></span> ${esc(x.modelo)} ${tamCurto(x.tam)} ${esc(x.cor)}`;
+function achaFiltro(q){
+  const mods=[...new Set(D.estoque.map(x=>x.modelo))].filter(m=>new RegExp('\\b'+norm(m)+'\\b').test(q));
+  const CM={preto:'Preto',preta:'Preto',pretos:'Preto',azul:'Azul',azuis:'Azul',marinho:'Azul',marrom:'Marrom',marrons:'Marrom',branco:'Branco',branca:'Branco',brancos:'Branco'};
+  const cores=[...new Set(Object.keys(CM).filter(k=>new RegExp('\\b'+k+'\\b').test(q)).map(k=>CM[k]))];
+  const tams=[];if(/\br1\b|\bp\/?m\b/.test(q))tams.push('R1');if(/\br3\b|\bg\b/.test(q))tams.push('R3');if(/\bun\b|\bunico\b/.test(q))tams.push('UN');
+  return {mods,cores,tams,tem:mods.length+cores.length+tams.length>0,txt:[mods.join('/'),tams.join('/'),cores.join('/')].filter(Boolean).join(' ')};
+}
+const passa=(f,modelo,tam,cor)=>(!f.mods.length||f.mods.some(m=>norm(m)===norm(modelo)))&&(!f.cores.length||f.cores.some(c=>norm(c)===norm(cor)))&&(!f.tams.length||f.tams.includes(String(tam).split(' ')[0].toUpperCase()));
+const passaX=(f,x)=>passa(f,x.modelo,tamCurto(x.tam),x.cor);
+const passaV=(f,sku)=>passa(f,modeloDe(sku),String(skuInfo(sku)[1]||''),corDe(sku));
+function periodoQ(q){const fim=ultimaVenda();
+  if(/anteontem/.test(q)){const d=addDias(hoje(),-2);return{ini:d,fim:d,nome:'anteontem'}}
+  if(/ontem/.test(q)){const d=addDias(hoje(),-1);return{ini:d,fim:d,nome:'ontem ('+dbr(d)+')'}}
+  if(/hoje/.test(q))return{ini:hoje(),fim:hoje(),nome:'hoje'};
+  const m=/(\d+)\s*d/.exec(q);if(m){const n=Math.max(1,+m[1]);return{ini:addDias(fim,-(n-1)),fim,nome:`${n} dias (${dbr(addDias(fim,-(n-1)))} a ${dbr(fim)})`}}
+  if(/mes/.test(q)){const ini=hoje().slice(0,7)+'-01';return{ini,fim,nome:'este mês'}}
+  if(/semana/.test(q))return{ini:addDias(fim,-6),fim,nome:'7 dias'};
+  return{ini:addDias(fim,-6),fim,nome:`7 dias (${dbr(addDias(fim,-6))} a ${dbr(fim)})`}}
+function responde(t){
+  const q=norm(t),f=achaFiltro(q),A=ativos(),dono=D.user.dono,doF=f.tem?' de '+esc(f.txt):'';
+  if(/^(oi|ola|opa|e ai|bom dia|boa tarde|boa noite)\b/.test(q)&&q.length<18)return 'Olá! O que você quer saber do estoque? Use os botões aí embaixo ou escreva do seu jeito.';
+  if(/^ajuda$|o que (voce|vc) faz|comandos/.test(q))return '<h4>O que eu respondo</h4>Estoque de qualquer modelo, cor ou tamanho · o que falta · alertas · próximo corte (rolos por cor) · vendas por período · mais vendidos e parados · lotes na oficina · Piranha'+(dono?' · pagamento das oficinas':'')+'.';
+  // pagamento
+  if(/devo|pagar|pagamento|paguei/.test(q)){
+    if(!dono||!D.pagamento)return 'Pagamento só aparece para o dono.';
+    const L=[];D.pagamento.forEach((b,i)=>b.oficinas.forEach(o=>{if(!o.pago&&o.apagar)L.push(lnA(`${esc(o.oficina)} · ${esc(b.periodo)}`,`<b>${brl(o.apagar)}</b>`,`ir('pagamento')`))}));
+    return L.length?`<h4>Falta pagar ${brl(pagAberto())}</h4>`+L.join('')+'<div class="mut" style="font-size:12px;margin-top:6px">Toque numa linha para abrir o Pagamento.</div>':'Nada em aberto com as oficinas. ✅';
+  }
+  // corte
+  if(/corte|cortar|descansar|rolo|produzir/.test(q)){
+    const P=planoCorte(),C=P.cores.filter(c=>c.rolos),G=P.grid.filter(o=>!f.tem||f.mods.some(m=>o.nome.toLowerCase().startsWith(norm(m))));
+    if(!P.rolos&&!G.length)return `Nada precisa ser cortado para cobrir ${PA} dias. ✅`;
+    let h=`<h4>Próximo corte · cobrir ${PA} dias</h4>`+(C.length?C.map(c=>lnA(`<span class="dot" style="background:${COR_HEX[c.cor]};width:9px;height:9px"></span> ${c.cor}`,`<b>${c.rolos} rolo${c.rolos>1?'s':''}</b> <span class="mut">${n0(c.need)} pçs</span>`)).join(''):'');
+    h+='<div style="margin-top:8px"></div>'+G.sort((a,b)=>soma(Object.values(b.cores),v=>v)-soma(Object.values(a.cores),v=>v)).map(o=>lnA(esc(o.nome),CORES.filter(c=>o.cores[c]).map(c=>`${c[0]} ${n0(o.cores[c])}`).join(' · '))).join('');
+    const falt=C.filter(c=>c.tec&&c.tec.rolos!=null&&c.tec.rolos<c.rolos);
+    if(falt.length)h+=`<div style="color:#ff8a65;font-size:12.5px;margin-top:6px">Comprar tecido: ${falt.map(c=>`${c.rolos-c.tec.rolos} ${esc(c.tec.nome)}`).join(', ')}</div>`;
+    return h+`<div class="mut" style="font-size:12px;margin-top:6px">Já desconta estoque e o que está na oficina. <a style="color:var(--acc)" onclick="ir('planejar')">Abrir Planejar corte ›</a></div>`;
+  }
+  // lotes / oficina
+  if(/lote|oficina|costura|vladimir/.test(q)){
+    const L=D.producao.lotes.filter(l=>!l.pend&&l.falta>0);
+    if(!L.length)return 'Nenhum lote em aberto na oficina.';
+    return `<h4>${L.length} lote${L.length>1?'s':''} na oficina</h4>`+L.map(l=>lnA(`Lote ${esc(l.lote)} <span class="mut">${l.data?dbr(l.data)+' · '+difDias(hoje(),l.data)+' dias':''}</span>`,`falta <b>${n0(l.falta)}</b> de ${n0(l.totalCortadas)}`,`ir('producao')`)).join('');
+  }
+  if(/piranha/.test(q)){const pir=D.estoque.filter(x=>x.piranha);
+    return '<h4>🐟 Piranha</h4>'+(pir.length?pir.map(x=>lnA(nomeX(x),`${n0(x.estoque)} est.`)).join(''):'Nenhuma marcada.')+'<div class="mut" style="font-size:12px;margin:8px 0 2px">Sugestão para a próxima troca:</div>'+sugerePiranha().map(x=>lnA(nomeX(x),`${n0(x.estoque)} est. · ${n1(x.media)}/dia`)).join('');}
+  if(/alerta|urgente|problema/.test(q)){const L=alertas();if(!L.length)return 'Nenhum alerta agora. Tudo em ordem. ✅';
+    return `<h4>${L.length} alerta${L.length>1?'s':''}</h4>`+L.slice(0,12).map(a=>lnA(`${a.n===3?'🔴':a.n===2?'🟡':'🟢'} <b>${esc(a.t)}</b><br><span class="mut" style="font-size:12px">${esc(a.d)}</span>`,'',a.go||'')).join('');}
+  // vendas
+  if(/vend|saiu|sairam|vendeu/.test(q)&&!/parad|menos|encalh/.test(q)){
+    if(/mais|top|campe|melhor/.test(q))return topVend(q,f);
+    const p=periodoQ(q),L=vendasRange(p.ini,p.fim).filter(r=>!f.tem||passaV(f,r[1])),tot=soma(L,r=>r[2]);
+    if(!tot)return `Nenhuma venda${doF} em ${p.nome}.${p.fim>ultimaVenda()?` As vendas estão lançadas até ${dbr(ultimaVenda())}.`:''}`;
+    const top=agrupa(L,r=>r[1]).slice(0,6),nd=Math.max(1,difDias(p.fim,p.ini)+1);
+    return `<h4>${n0(tot)} peças${doF} · ${p.nome}</h4>${nd>1?`<div class="mut" style="font-size:12.5px;margin-bottom:6px">Média de ${n1(tot/nd)} por dia</div>`:''}`+top.map(([s,v])=>lnA(esc(nomeSku(s)),`<b>${n0(v)}</b>`)).join('');
+  }
+  if(/mais vend|top|campe|melhor/.test(q))return topVend(q,f);
+  if(/parad|menos vend|encalh|nao vende|sobrando/.test(q)){
+    const L=A.filter(x=>x.estoque>0&&(!f.tem||passaX(f,x))).map(x=>({x,d:x.media?x.estoque/x.media:9999})).sort((a,b)=>b.d-a.d).slice(0,8);
+    return `<h4>Mais parados${doF}</h4>`+L.map(o=>lnA(nomeX(o.x),`${n0(o.x.estoque)} est. · ${o.d>=9999?'sem venda':n0(o.d)+' dias'}`,`detSku('${o.x.sku}')`)).join('')+'<div class="mut" style="font-size:12px;margin-top:6px">Bons candidatos para Piranha ou promoção.</div>';
+  }
+  if(/falta|faltando|acaba|zerad|repor|acabou|precis/.test(q)){
+    const L=A.filter(x=>ehFalta(x)&&(!f.tem||passaX(f,x))).sort((a,b)=>(a.dias??-1)-(b.dias??-1));
+    if(!L.length)return `Nada faltando${doF}. ✅`;
+    return `<h4>${L.length} SKU${L.length>1?'s':''} faltando${doF}</h4>`+L.map(x=>lnA(nomeX(x),`<b style="color:${corDias(x.dias)}">${n0(x.estoque)}</b> <span class="mut">${x.dias==null?'':n0(x.dias)+'d'}${x.producao?' · +'+n0(x.producao)+' of.':''}</span>`,`detSku('${x.sku}')`)).join('');
+  }
+  // estoque (padrão quando cita modelo/cor/tamanho)
+  if(f.tem||/estoque|quanto|tem |total|pecas/.test(q)){
+    const L=D.estoque.filter(x=>(x.ativo||x.estoque>0)&&(!f.tem||passaX(f,x)));
+    if(!L.length)return `Não achei nada${doF}.`;
+    const tot=soma(L,x=>x.estoque),pr=soma(L,x=>x.producao);
+    let h=`<h4>${n0(tot)} peças${doF||' no total'}</h4>${pr?`<div class="mut" style="font-size:12.5px;margin-bottom:6px">+${n0(pr)} na oficina</div>`:''}`;
+    if(L.length>16){const g={};L.forEach(x=>{const k=x.modelo+' '+tamCurto(x.tam);g[k]=(g[k]||0)+x.estoque});return h+Object.entries(g).map(([k,v])=>lnA(esc(k),`<b>${n0(v)}</b>`)).join('')}
+    return h+L.map(x=>lnA(nomeX(x),`<b style="color:${ehFalta(x)?corDias(x.dias):'var(--ink)'}">${n0(x.estoque)}</b> <span class="mut">${x.dias==null?'':n0(x.dias)+'d'}${x.producao?' · +'+n0(x.producao):''}</span>`,`detSku('${x.sku}')`)).join('');
+  }
+  return 'Não entendi essa. Tente <b>o que falta</b>, <b>malta preto r1</b>, <b>próximo corte</b> ou <b>vendas de ontem</b>. Escreva <b>ajuda</b> para ver tudo.';
+}
+function topVend(q,f){const p=/\d+\s*d|mes|semana|ontem|hoje/.test(q)?periodoQ(q):{ini:addDias(ultimaVenda(),-14),fim:ultimaVenda(),nome:'15 dias'};
+  const L=vendasRange(p.ini,p.fim).filter(r=>!f.tem||passaV(f,r[1])),tot=soma(L,r=>r[2]);if(!tot)return 'Sem vendas nesse período.';
+  return `<h4>Mais vendidos · ${p.nome}</h4>`+agrupa(L,r=>r[1]).slice(0,8).map(([s,v],i)=>lnA(`${i+1}º ${esc(nomeSku(s))}`,`<b>${n0(v)}</b> <span class="mut">${n1(v/tot*100)}%</span>`)).join('');}
+
 function detSku(sku){
   const x=D.estoque.find(s=>s.sku===sku);if(!x)return;
   const falta=(D.producao.falta||[]).find(f=>f.nome.toLowerCase()===(x.modelo+' '+tamCurto(x.tam)).toLowerCase());
@@ -381,12 +573,12 @@ function desenhaBlocos(){
 }
 function guarda(i){const b=BL[i];b.q={};b.d={};CORES.forEach(c=>{b.q[c]=num(val('eb_'+i+'_'+c));b.d[c]=num(val('ed_'+i+'_'+c))});somaE()}
 function somaE(){const t=BL.reduce((s,b)=>s+CORES.reduce((x,c)=>x+((b.q||{})[c]||0),0),0);const e=$('#etot');if(e)e.textContent=n0(t)+' peças'}
-function sEntrega(){
+async function sEntrega(){
   const itens=[];
   BL.forEach(b=>{if(!b.k)return;const[modelo,tam]=b.k.split('|');CORES.forEach(c=>{const q=(b.q||{})[c]||0,d=(b.d||{})[c]||0;if(q||d)itens.push({modelo,tam,cor:c,boas:q,defeito:d})})});
   if(!itens.length)return toast('Informe as quantidades');
   const tot=itens.reduce((s,i)=>s+i.boas,0);
-  if(!confirm(`Lançar ${tot} peças boas em ${itens.length} linha(s)?`))return;
+  if(!await pergunta(`Lançar ${tot} peças boas em ${itens.length} linha(s)?`,'Lançar'))return;
   const P={data:val('edata'),lote:val('elote'),oficina:val('eofi'),obs:val('eobs'),itens};
   acao('novaEntrega',P,()=>itens.slice().reverse().forEach(i=>D.entregas.itens.unshift(Object.assign({},i,{tam:i.tam,data:P.data,lote:P.lote,oficina:P.oficina||'',pend:true}))));
 }
@@ -396,7 +588,7 @@ function vMais(){
   const A=alertas(),urg=A.filter(a=>a.n>=3).length,dono=D.user.dono,ab=dono&&D.pagamento?pagAberto():0;
   const it=(t,ic,nome,bd)=>`<button class="mi" onclick="ir('${t}')">${bd?`<span class="bd">${bd}</span>`:''}<i>${ic}</i><b>${nome}</b></button>`;
   let h='<div class="mg">'+it('alertas','⚠️','Alertas',urg)+it('vendas','📈','Vendas')+it('resumo','🗓','Resumo do mês')+it('planejar','✂️','Planejar corte')+it('oficinas','🏭','Oficinas')+(D.tecido?it('tecido','🧵','Tecido'):'')+(dono&&D.pagamento?it('pagamento','💰','Pagamento',ab?'R$':''):'')+it('relatorio','📄','Relatório PDF')+it('etiquetas','🏷','Etiquetas QR')+(dono?it('usuarios','👥','Pessoas e PINs')+it('historico','🕘','Histórico'):'')+
-  `<button class="mi" onclick="if(confirm('Sair deste celular?')){store('est_pin');store(CK());location.reload()}"><i>🚪</i><b>Sair</b></button></div>`;
+  `<button class="mi" onclick="sair()"><i>🚪</i><b>Sair</b></button></div>`;
   return h;
 }
 const MESES=['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
@@ -514,10 +706,11 @@ function vPagamento(){
   return h;
 }
 async function pagEnviar(p,desfaz){sync(true,'salvando');try{const r=await call('pagSet',p,true);D.pagamento=r.pagamento;store(CK(),JSON.stringify(D));toast('Salvo na planilha')}catch(e){desfaz();toast('Erro: '+e.message)}finally{sync(false);render()}}
-function pagTog(i,t,j){const b=D.pagamento[i],x=t==='o'?b.oficinas[j]:b.entregas[j],campo=t==='o'?'pago':'conf',c=t==='o'?x.cPago:x.cConf,velho=x[campo];
-  if(t==='o'&&!velho&&!confirm(`Marcar ${x.oficina} como pago (${brl(x.apagar)})?`))return;
+async function pagTog(i,t,j){const b=D.pagamento[i],x=t==='o'?b.oficinas[j]:b.entregas[j],campo=t==='o'?'pago':'conf',c=t==='o'?x.cPago:x.cConf,velho=x[campo];
+  if(t==='o'&&!velho&&!await pergunta(`Marcar ${x.oficina} como pago (${brl(x.apagar)})?`,'Marcar como pago'))return;
+  if(t==='o'&&velho&&!await pergunta(`Desmarcar o pagamento de ${x.oficina}?`,'Desmarcar',true))return;
   x[campo]=!velho;render();pagEnviar({campo,r:x.r,c,valor:!velho,desc:(x.oficina||'')+' '+(b.periodo||'')},()=>{x[campo]=velho})}
-function pagVale(i,j){const e=D.pagamento[i].entregas[j],v=prompt(`Vale para a entrega de ${dbr(e.data)} (${e.oficina}). Deixe vazio para tirar:`,e.vale||'');if(v===null)return;const velho=e.vale;e.vale=num(v);render();pagEnviar({campo:'vale',r:e.r,c:e.cVale,valor:e.vale},()=>{e.vale=velho})}
+async function pagVale(i,j){const e=D.pagamento[i].entregas[j],v=await pedeValor(`Vale para a entrega de ${dbr(e.data)} (${e.oficina}). Deixe vazio para tirar.`,e.vale||'');if(v===null)return;const velho=e.vale;e.vale=num(v);render();pagEnviar({campo:'vale',r:e.r,c:e.cVale,valor:e.vale},()=>{e.vale=velho})}
 
 
 // ---------- BUSCA + AJUSTE (Estoque) ----------
@@ -553,8 +746,8 @@ const difTxt=(q,at)=>q==null||q===''?'—':(q-at>0?'+':'')+n0(q-at);
 function guardaAj(i){const b=BA[i];b.q={};CORES.forEach(c=>{const s=val('aq_'+i+'_'+c);b.q[c]=s===''?null:num(s);if(ajContagem()){const x=skuDe(b.k,c),e=$('#ad_'+i+'_'+c);if(e)e.textContent=difTxt(b.q[c],x?x.estoque:0)}});somaAj()}
 function itensAj(){const out=[],cont=ajContagem(),sg=ajSinal();BA.forEach(b=>{if(!b.k)return;const[modelo,tam]=b.k.split('|');CORES.forEach(c=>{const q=(b.q||{})[c];if(q==null||q==='')return;const x=skuDe(b.k,c),at=x?x.estoque:0;const d=cont?q-at:sg*Math.abs(q);if(d)out.push({modelo,tam,cor:c,qtd:d,obs:cont?`contado ${q}, tinha ${at}`:''})})});return out}
 function somaAj(){const t=itensAj().reduce((s,i)=>s+i.qtd,0),e=$('#atot');if(e)e.textContent=(t>0?'+':'')+n0(t)+' peças'}
-function sAjuste(){const itens=itensAj();if(!itens.length)return toast('Nada para ajustar');const t=itens.reduce((s,i)=>s+i.qtd,0);
-  if(!confirm(`Lançar ajuste "${AJM}" de ${t>0?'+':''}${t} peças em ${itens.length} SKU(s)?`))return;
+async function sAjuste(){const itens=itensAj();if(!itens.length)return toast('Nada para ajustar');const t=itens.reduce((s,i)=>s+i.qtd,0);
+  if(!await pergunta(`Lançar ajuste "${AJM}" de ${t>0?'+':''}${t} peças em ${itens.length} SKU(s)?`,'Lançar'))return;
   const P={data:val('adata'),motivo:AJM,obs:val('aobs'),itens};
   acao('novoAjuste',P,()=>itens.forEach(i=>{const x=skuDe(i.modelo+'|'+i.tam,i.cor);if(x)x.estoque+=i.qtd}))}
 
@@ -564,8 +757,8 @@ function eEntrega(linha){const e=D.entregas.itens.find(x=>x.linha===linha);if(!e
   <div class="grid2" style="margin-top:10px"><div><label>Boas</label><input id="xb" inputmode="numeric" value="${e.boas}"></div><div><label>Defeito</label><input id="xd" inputmode="numeric" value="${e.defeito||0}"></div></div>
   <button class="btn" onclick="sEditE(${linha})">Salvar correção</button>
   <button class="btn sec" style="color:var(--bad);border-color:#6a2f20" onclick="sEditE(${linha},true)">Apagar esta entrega</button>`)}
-function sEditE(linha,apagar){const e=D.entregas.itens.find(x=>x.linha===linha);if(!e)return;
-  if(apagar&&!confirm(`Apagar ${e.boas} ${e.modelo} ${tamCurto(e.tam)} ${e.cor} de ${dbr(e.data)}? Isso tira as peças do estoque.`))return;
+async function sEditE(linha,apagar){const e=D.entregas.itens.find(x=>x.linha===linha);if(!e)return;
+  if(apagar&&!await pergunta(`Apagar ${e.boas} ${e.modelo} ${tamCurto(e.tam)} ${e.cor} de ${dbr(e.data)}? Isso tira as peças do estoque.`,'Apagar',true))return;
   const b=num(val('xb')),d=num(val('xd'));
   acao('editEntrega',{linha,boas:b,defeito:d,apagar:!!apagar,chk:{data:e.data,modelo:e.modelo,cor:e.cor}},()=>{if(apagar)D.entregas.itens=D.entregas.itens.filter(x=>x!==e);else{e.boas=b;e.defeito=d;e.pend=true}})}
 
@@ -654,7 +847,7 @@ function fUsuario(linha){const u=(D.usuarios||[]).find(x=>x.linha===linha)||{nom
   open_(`<h2>${linha?'Editar':'Nova'} pessoa</h2><label>Nome</label><input id="un" value="${esc(u.nome)}"><label>PIN (4 a 8 números)</label><input id="up" inputmode="numeric" value="${esc(u.pin)}">
   <label>Perfil</label><select id="upf"><option value="equipe" ${u.perfil!=='dono'?'selected':''}>Equipe</option><option value="dono" ${u.perfil==='dono'?'selected':''}>Dono</option></select>
   <button class="btn" onclick="acao('salvarUsuario',{linha:${linha||0},nome:val('un'),pin:val('up'),perfil:val('upf')})">Salvar</button>
-  ${linha?`<button class="btn sec" style="color:var(--bad)" onclick="if(confirm('Remover ${esc(u.nome)}? O PIN para de funcionar.'))acao('removerUsuario',{linha:${linha}})">Remover</button>`:''}`)}
+  ${linha?`<button class="btn sec" style="color:var(--bad)" onclick="pergunta('Remover ${esc(u.nome)}? O PIN para de funcionar.','Remover',true).then(ok=>{if(ok)acao('removerUsuario',{linha:${linha}})})">Remover</button>`:''}`)}
 let HU='';
 function vHistorico(){if(!D.user.dono)return '<p class="mut">Sem acesso.</p>';const L=D.log||[],us=[...new Set(L.map(x=>x[1]))];
   const f=L.filter(x=>!HU||x[1]===HU);
@@ -731,7 +924,9 @@ function vRecibo(){
   <div class="ass"><div>LOGARI</div><div>${esc(o.oficina)}</div></div></div>`;
 }
 
-if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&D&&PIN){const u=+getStore('est_t')||0;if(Date.now()-u>60000)carregar()}});
+if('serviceWorker' in navigator){const tinha=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').catch(()=>{});
+  let rec=false;navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!tinha||rec)return;rec=true;if(!$('#modal').innerHTML&&!$('#cfm').innerHTML&&!fila().length)location.reload();else toast('Nova versão pronta — feche e abra o app')})}
 (function(){const p=getStore('est_pin');if(p){$('#pin').value=p;entrar()}$('#pin').addEventListener('keydown',e=>{if(e.key==='Enter')entrar()})})();
 </script>
 </body>
