@@ -458,7 +458,7 @@ function responde(t){
   if(/corte|cortar|descansar|rolo|produzir/.test(q)){
     const P=planoCorte(),C=P.cores.filter(c=>c.rolos),G=P.grid.filter(o=>!f.tem||f.mods.some(m=>o.nome.toLowerCase().startsWith(norm(m))));
     if(!P.rolos&&!G.length)return `Nada precisa ser cortado para cobrir ${PA} dias. ✅`;
-    let h=`<h4>Próximo corte · cobrir ${PA} dias</h4>`+(C.length?C.map(c=>lnA(`<span class="dot" style="background:${COR_HEX[c.cor]};width:9px;height:9px"></span> ${c.cor}`,`<b>${c.rolos} rolo${c.rolos>1?'s':''}</b> <span class="mut">${n0(c.need)} pçs</span>`)).join(''):'');
+    let h=`<h4>Próximo corte · cobrir ${PA} dias</h4>`+(C.length?C.map(c=>lnA(`<span class="dot" style="background:${COR_HEX[c.cor]};width:9px;height:9px"></span> ${c.cor}`,`<b>${c.rolos} rolo${c.rolos>1?'s':''}</b> <span class="mut">${c.por.map(o=>(MODN[o.m]||o.m)+' '+o.rolos).join(' · ')}</span>`)).join(''):'');
     h+='<div style="margin-top:8px"></div>'+G.sort((a,b)=>soma(Object.values(b.cores),v=>v)-soma(Object.values(a.cores),v=>v)).map(o=>lnA(esc(o.nome),CORES.filter(c=>o.cores[c]).map(c=>`${c[0]} ${n0(o.cores[c])}`).join(' · '))).join('');
     const falt=C.filter(c=>c.tec&&c.tec.rolos!=null&&c.tec.rolos<c.rolos);
     if(falt.length)h+=`<div style="color:#ff8a65;font-size:12.5px;margin-top:6px">Comprar tecido: ${falt.map(c=>`${c.rolos-c.tec.rolos} ${esc(c.tec.nome)}`).join(', ')}</div>`;
@@ -802,25 +802,29 @@ async function sEditE(linha,apagar){const e=D.entregas.itens.find(x=>x.linha===l
   acao('editEntrega',{linha,boas:b,defeito:d,apagar:!!apagar,chk:{data:e.data,modelo:e.modelo,cor:e.cor}},()=>{if(apagar)D.entregas.itens=D.entregas.itens.filter(x=>x!==e);else{e.boas=b;e.defeito=d;e.pend=true}})}
 
 // ---------- PLANEJAR: previsão + plano de corte ----------
-let PA=20;
+let PA=22;const MODN={Mulc:'Mula manca',Malta:'Malta',Ret:'Ret'};
 // peças que cada rolo rende, por modelo (informado pelo Manuel; o lote P1 confirmou ~120/rolo no mix Malta)
 const RENDE={Mulc:160,Malta:120,Ret:120};
 function fpr(){let f=0,r=0;D.producao.lotes.forEach(l=>CORES.forEach(c=>{if(l.rolos[c]&&l.folhas[c]){f+=l.folhas[c];r+=l.rolos[c]}}));return r?f/r:6}
 function encaixeFam(){const o={};D.producao.lotes.slice().reverse().forEach(l=>Object.entries(l.encaixe||{}).forEach(([k,n])=>{const f=k.split(' ')[0];if(!o[f])o[f]={lote:l.lote,enc:{}};if(o[f].lote===l.lote)o[f].enc[k]=n}));return o}
 function tecidoDe(cor){const t=D.tecido;if(!t)return null;const m=(t.comprar||[]).find(x=>norm(x.peca)===norm(cor));const nome=m?m.tecido:cor;return {nome,rolos:(t.saldo||{})[nome]??null}}
 function planoCorte(){
-  const need=x=>Math.max(0,Math.round(x.media*PA-x.estoque-x.producao));
+  // igual à planilha: só produz quem cobre menos de (dias − 7 de produção); o lote leva até PA dias de venda
+  const need=x=>{const m=+x.media||0,t=(+x.estoque||0)+(+x.producao||0);if(!m||t/m>=PA-7)return 0;return Math.max(0,Math.ceil(m*PA-t))};
   let pc=0,rl=0;D.producao.lotes.forEach(l=>{const r=CORES.reduce((s,c)=>s+(l.rolos[c]||0),0);if(r&&l.totalCortadas){pc+=l.totalCortadas;rl+=r}});const ppr=rl?pc/rl:120;
   const g={};ativos().forEach(x=>{const n=need(x);if(!n)return;const k=x.modelo+' '+tamCurto(x.tam);(g[k]=g[k]||{nome:k,cores:{}}).cores[x.cor]=n});
   const sem={};
-  const cores=CORES.map(c=>{let n=0,r=0;Object.values(g).forEach(o=>{const q=o.cores[c]||0;if(!q)return;n+=q;const m=o.nome.split(' ')[0];if(RENDE[m])r+=q/RENDE[m];else sem[m]=(sem[m]||0)+q});return{cor:c,need:n,exato:r,rolos:r>0.15?Math.ceil(r-0.15):0,tec:tecidoDe(c)}});
+  // 1 rolo serve a um modelo só: arredonda por modelo e depois soma a cor
+  const cores=CORES.map(c=>{let n=0;const mq={};Object.values(g).forEach(o=>{const q=o.cores[c]||0;if(!q)return;n+=q;const m=o.nome.split(' ')[0];if(RENDE[m])mq[m]=(mq[m]||0)+q;else sem[m]=(sem[m]||0)+q});
+    const por=Object.entries(mq).map(([m,q])=>({m,pecas:q,rolos:Math.ceil(q/RENDE[m])})).filter(o=>o.rolos);const r=por.reduce((s,o)=>s+o.rolos,0);
+    return{cor:c,need:n,exato:r,rolos:r,por,tec:tecidoDe(c)}});
   return{grid:Object.values(g),cores,ppr,sem,rolos:cores.reduce((s,c)=>s+c.rolos,0)};
 }
 function vPlanejar(){
-  let h=`<div class="chips"><span class="mut" style="font-size:12px;align-self:center">Cobrir</span>${[15,20,30,45].map(n=>`<button class="${PA===n?'on':''}" onclick="PA=${n};render()">${n} dias</button>`).join('')}</div>`;
+  let h=`<div class="chips"><span class="mut" style="font-size:12px;align-self:center">Cobrir</span>${[15,22,30,45].map(n=>`<button class="${PA===n?'on':''}" onclick="PA=${n};render()">${n} dias</button>`).join('')}</div>`;
   const P=planoCorte(),tp=P.cores.reduce((s,c)=>s+c.need,0);
   h+=`<div class="card" style="border-color:var(--acc)"><div class="k">Colocar para descansar</div><div class="big">${n0(P.rolos)} rolos</div><div class="mut" style="font-size:12px">Para cobrir ${PA} dias de venda · já desconta estoque e o que está na oficina · ${n0(tp)} peças</div>
-  <div class="grid2" style="margin-top:10px">${P.cores.filter(c=>c.rolos).map(c=>{const t=c.tec,ok=t&&t.rolos!=null?t.rolos>=c.rolos:null;return `<div style="border:1px solid var(--line);border-radius:6px;padding:8px"><div><span class="dot" style="background:${COR_HEX[c.cor]}"></span> ${c.cor}</div><div style="font:800 22px var(--serif)">${c.rolos}</div>${t&&t.rolos!=null?`<div style="font-size:11.5px;color:${ok?'var(--ok)':'#f07a55'}">${ok?'tem '+n0(t.rolos):'falta '+n0(c.rolos-t.rolos)} ${esc(t.nome)}</div>`:''}</div>`}).join('')||'<span class="mut">Nada precisa descansar agora.</span>'}</div>
+  <div class="grid2" style="margin-top:10px">${P.cores.filter(c=>c.rolos).map(c=>{const t=c.tec,ok=t&&t.rolos!=null?t.rolos>=c.rolos:null;return `<div style="border:1px solid var(--line);border-radius:6px;padding:8px"><div><span class="dot" style="background:${COR_HEX[c.cor]}"></span> ${c.cor}</div><div style="font:800 22px var(--serif)">${c.rolos}</div><div class="mut" style="font-size:11.5px">${c.por.map(o=>(MODN[o.m]||o.m)+' '+o.rolos).join(' · ')}</div>${t&&t.rolos!=null?`<div style="font-size:11.5px;color:${ok?'var(--ok)':'#f07a55'}">${ok?'tem '+n0(t.rolos):'falta '+n0(c.rolos-t.rolos)} ${esc(t.nome)}</div>`:''}</div>`}).join('')||'<span class="mut">Nada precisa descansar agora.</span>'}</div>
   <div class="mut" style="font-size:11.5px;margin-top:8px">Rende por rolo: ${Object.entries(RENDE).map(([m,n])=>m+' '+n).join(' · ')} peças${Object.keys(P.sem).length?` · <span style="color:var(--warn)">sem rendimento: ${Object.entries(P.sem).map(([m,n])=>m+' ('+n0(n)+' peças)').join(', ')}</span>`:''}</div></div>`;
   if(!tp)return h+'<p class="mut">Nada para cortar nesse horizonte.</p>'+previsao();
   h+=`<div class="card"><div class="k">Por cor</div><table style="margin-top:6px"><tr><th style="text-align:left">Cor</th><th>Peças</th><th>Rolos</th><th>Tecido</th></tr>${P.cores.filter(c=>c.need).map(c=>{const t=c.tec,ok=t&&t.rolos!=null?t.rolos>=c.rolos:null;return `<tr><td><span class="dot" style="background:${COR_HEX[c.cor]}"></span> ${c.cor}</td><td>${n0(c.need)}</td><td><b>${c.rolos}</b></td><td style="font-size:12px;color:${ok===null?'var(--mut)':ok?'var(--ok)':'#f07a55'}">${t&&t.rolos!=null?(ok?'tem '+t.rolos:'falta '+(c.rolos-t.rolos))+' <span class="mut">'+esc(t.nome)+'</span>':'—'}</td></tr>`}).join('')}</table></div>
