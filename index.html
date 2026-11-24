@@ -204,6 +204,8 @@ nav button{position:relative}nav .bdg{position:absolute;top:4px;left:calc(50% + 
 .msg.bot h4{margin:0 0 6px;font:800 15px var(--serif);color:var(--acc)}
 .cbar{position:fixed;left:0;right:0;bottom:calc(58px + env(safe-area-inset-bottom));z-index:6;background:#0c0b0a;border-top:1px solid var(--line);padding:8px 10px}
 .cbar .sg{display:flex;gap:6px;overflow-x:auto;margin-bottom:8px}.cbar .sg button{flex:none;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:16px;padding:6px 11px;font:inherit;font-size:12.5px}
+.sw{width:42px;height:24px;border-radius:12px;background:#2a2620;border:1px solid var(--line);position:relative;flex:none;transition:.2s}.sw i{position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:var(--mut);transition:.2s}.sw.on{background:#3c5a2a;border-color:#4f7a36}.sw.on i{left:20px;background:#e8f3dc}
+.pills.hrs{display:grid;grid-template-columns:repeat(6,1fr)}.pills.hrs button{padding:7px 0}
 .cbar form{display:flex;gap:8px;max-width:640px;margin:0 auto}.cbar input{flex:1;border-radius:22px;padding:11px 16px}.cbar form button{border:0;border-radius:22px;background:var(--acc);color:var(--acc-ink);font:inherit;font-weight:700;padding:0 16px}
 </style>
 </head>
@@ -327,7 +329,7 @@ function vPainel(){
   <div class="sub">+${n0(prod)} na oficina · vendendo ${n0(med)} por dia${dono?' · '+brl(soma(D.estoque,x=>x.valor))+' em custo':''}</div>
   <div class="cov"><span>Cobertura</span><b style="color:${corDias(cob)};font-size:14px">${n0(cob)} dias</b></div>
   <div class="gauge"><i style="left:${pos}%"></i></div><div class="row sp mut" style="font-size:10px;margin-top:4px"><span>0</span><span style="margin-left:14%">7</span><span style="margin-left:10%">15</span><span>30+ dias</span></div></div>`;
-  if(pushOk()&&!pushAtivo()&&Notification.permission!=='denied')h+=`<button class="todo" style="border-color:#4a3d28" onclick="ir('avisos')"><span class="ic" style="background:#2a241b">🔔</span><span class="tx"><b>Ligar aviso das 8h e 10h</b><small>Receba no celular o que falta no estoque</small></span><span class="ar">›</span></button>`;
+  if(pushOk()&&!pushAtivo()&&Notification.permission!=='denied')h+=`<button class="todo" style="border-color:#4a3d28" onclick="ir('avisos')"><span class="ic" style="background:#2a241b">🔔</span><span class="tx"><b>Ligar avisos no celular</b><small>Estoque, corte, oficina e vendas no horário que quiser</small></span><span class="ar">›</span></button>`;
   h+=`<div class="stt">${[['ZERADO','Zerados','#ff8a65'],['REPOR','Repor','#f5916b'],['ATENCAO','Atenção','var(--warn)'],['OK','OK','var(--ok)']].map(([k,t,c])=>`<button onclick="FS='${k==='OK'?'Todos':'FALTA'}';FMOD='Todos';ir('estoque')"><b style="color:${c}">${cnt(k)}</b>${t}</button>`).join('')}</div>`;
   // o que fazer agora
   const urg=A.filter(ehFalta).sort((a,b)=>(a.dias??-1)-(b.dias??-1));
@@ -380,11 +382,30 @@ async function ativarAvisos(){
   try{const p=await Notification.requestPermission();if(p!=='granted')return toast('Avisos bloqueados. Libere nas configurações do celular.');
     loading(true);const k=await call('pushKey',{},true);const reg=await navigator.serviceWorker.ready;
     let s=await reg.pushManager.getSubscription();if(!s)s=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64bin(k.key)});
-    await call('pushSub',{sub:s.toJSON()},true);await cfgSW();store('est_push','1');toast('Pronto! Avisos às 8h e 10h');render()}
+    await call('pushSub',{sub:s.toJSON()},true);await cfgSW();store('est_push','1');toast('Avisos ligados');AVC=null;render()}
   catch(e){toast('Erro: '+e.message)}finally{loading(false)}}
 async function desativarAvisos(){try{const reg=await navigator.serviceWorker.ready,s=await reg.pushManager.getSubscription();if(s){await call('pushDel',{endpoint:s.endpoint},true);await s.unsubscribe()}}catch(e){}store('est_push');toast('Avisos desligados');render()}
-async function testarAviso(){try{const r=await call('aviso',{},true);const reg=await navigator.serviceWorker.ready;await reg.showNotification(r.aviso.t,{body:r.aviso.b,icon:'icon-192.png',tag:'aviso'})}catch(e){toast('Erro: '+e.message)}}
-function vAvisos(){const on=pushAtivo();return `<div class="card"><div class="k">Avisos no celular</div><div class="mid" style="margin:6px 0">${on?'🔔 Ligados':'🔕 Desligados'}</div><p class="mut" style="margin:0;font-size:13.5px">Todo dia às <b>8h</b> e às <b>10h</b> chega uma notificação com o que falta no estoque e o que está em atenção${D.user.dono?', e quanto falta pagar às oficinas':''}.</p>${on?`<button class="btn" onclick="testarAviso()">Mostrar um aviso agora</button><button class="btn sec" onclick="desativarAvisos()">Desligar avisos</button>`:`<button class="btn" onclick="ativarAvisos()">Ligar avisos</button>`}</div>`}
+async function minhaInsc(){const reg=await navigator.serviceWorker.ready;return reg.pushManager.getSubscription()}
+async function testarAviso(){try{const s=await minhaInsc();if(!s)return toast('Ligue os avisos de novo');loading(true);await call('avisoTeste',{endpoint:s.endpoint},true);toast('Aviso enviado — confira as notificações')}catch(e){toast('Erro: '+e.message)}finally{loading(false)}}
+const AVT=[['estoque','📦','Estoque','Zerados, para repor e em atenção'],['descanso','🧵','Rolos para descansar','Quantos rolos de cada cor pôr para descansar'],['corte','✂️','Próximo corte','O que cortar e se falta tecido'],['oficina','🏭','Oficina e lotes','Lotes parados, entregas sem conferir, defeito'],['pagamento','💰','Pagamento','Quanto falta pagar às oficinas'],['vendas','📈','Vendas e Piranha','Vendas do dia, vendas atrasadas, troca da Piranha']];
+const DSEM=['D','S','T','Q','Q','S','S'];
+let AVC=null,AVSUJO=false;
+async function avCarregar(){try{const s=await minhaInsc();if(!s)return;const r=await call('pushCfgGet',{endpoint:s.endpoint},true);if(r.cfg&&!AVSUJO){AVC=r.cfg;store('est_avc',JSON.stringify(AVC));render()}}catch(e){}}
+function avTog(t){const c=AVC[t]=AVC[t]||{on:false,h:[9],d:[0,1,2,3,4,5,6]};c.on=!c.on;AVSUJO=true;render()}
+function avHora(t,h){const c=AVC[t],i=c.h.indexOf(h);if(i>=0)c.h.splice(i,1);else{if(c.h.length>=6)return toast('No máximo 6 horários por aviso');c.h.push(h)}c.h.sort((a,b)=>a-b);AVSUJO=true;render()}
+function avDia(t,d){const c=AVC[t];c.d=c.d||[0,1,2,3,4,5,6];const i=c.d.indexOf(d);if(i>=0){if(c.d.length===1)return;c.d.splice(i,1)}else c.d.push(d);AVSUJO=true;render()}
+async function avSalvar(){try{const s=await minhaInsc();if(!s)return toast('Ligue os avisos de novo');loading(true);await call('pushCfgSet',{endpoint:s.endpoint,cfg:AVC},true);store('est_avc',JSON.stringify(AVC));AVSUJO=false;toast('Avisos salvos');render()}catch(e){toast('Erro: '+e.message)}finally{loading(false)}}
+function vAvisos(){
+  if(!pushAtivo())return `<div class="card"><div class="k">Avisos no celular</div><div class="mid" style="margin:6px 0">🔕 Desligados</div><p class="mut" style="margin:0;font-size:13.5px">Escolha o que quer receber e em que horário: estoque, rolos para descansar, corte, oficina${D.user.dono?', pagamento':''} e vendas.</p><button class="btn" onclick="ativarAvisos()">Ligar avisos</button></div>`;
+  if(!AVC){try{AVC=JSON.parse(getStore('est_avc')||'null')}catch(e){}if(!AVC)AVC={estoque:{on:true,h:[8,10],d:[0,1,2,3,4,5,6]}};avCarregar()}
+  let h=`<p class="mut" style="margin:0 4px 10px;font-size:13px">Ligue os avisos que quer receber, escolha os horários e os dias. Cada celular tem a sua escolha.</p>`;
+  AVT.filter(([t])=>t!=='pagamento'||D.user.dono).forEach(([t,ic,nome,desc])=>{const c=AVC[t]||{on:false,h:[],d:[0,1,2,3,4,5,6]},dias=c.d&&c.d.length?c.d:[0,1,2,3,4,5,6];
+    h+=`<div class="card"><div class="row sp" onclick="avTog('${t}')" style="cursor:pointer"><span><b style="font-size:15px">${ic} ${nome}</b><div class="mut" style="font-size:12px">${desc}</div></span><span class="sw${c.on?' on':''}"><i></i></span></div>`;
+    if(c.on)h+=`<div class="k" style="margin:12px 0 6px">Horários</div><div class="pills hrs">${Array.from({length:17},(_,i)=>i+6).map(x=>`<button class="${c.h.includes(x)?'on':''}" onclick="avHora('${t}',${x})">${x}h</button>`).join('')}</div>
+      <div class="k" style="margin:12px 0 6px">Dias</div><div class="pills">${DSEM.map((l,i)=>`<button class="${dias.includes(i)?'on':''}" style="min-width:36px" onclick="avDia('${t}',${i})">${l}</button>`).join('')}</div>${c.h.length?'':'<div style="color:var(--warn);font-size:12px;margin-top:6px">Escolha pelo menos um horário</div>'}`;
+    h+='</div>'});
+  h+=`<button class="btn" onclick="avSalvar()">${AVSUJO?'Salvar mudanças':'Salvo ✓'}</button><button class="btn sec" onclick="testarAviso()">Mandar um aviso agora</button><button class="btn sec" style="color:var(--mut);border-color:var(--line)" onclick="desativarAvisos()">Desligar todos os avisos</button>`;
+  return h}
 
 /* ---------- ASSISTENTE (responde na hora, com os dados já carregados) ---------- */
 let CH=null;
@@ -605,7 +626,7 @@ async function sEntrega(){
 function vMais(){
   const A=alertas(),urg=A.filter(a=>a.n>=3).length,dono=D.user.dono,ab=dono&&D.pagamento?pagAberto():0;
   const it=(t,ic,nome,bd)=>`<button class="mi" onclick="ir('${t}')">${bd?`<span class="bd">${bd}</span>`:''}<i>${ic}</i><b>${nome}</b></button>`;
-  let h='<div class="mg">'+it('alertas','⚠️','Alertas',urg)+it('avisos','🔔','Avisos 8h/10h')+it('vendas','📈','Vendas')+it('resumo','🗓','Resumo do mês')+it('planejar','✂️','Planejar corte')+it('oficinas','🏭','Oficinas')+(D.tecido?it('tecido','🧵','Tecido'):'')+(dono&&D.pagamento?it('pagamento','💰','Pagamento',ab?'R$':''):'')+it('relatorio','📄','Relatório PDF')+it('etiquetas','🏷','Etiquetas QR')+(dono?it('usuarios','👥','Pessoas e PINs')+it('historico','🕘','Histórico'):'')+
+  let h='<div class="mg">'+it('alertas','⚠️','Alertas',urg)+it('avisos','🔔','Avisos')+it('vendas','📈','Vendas')+it('resumo','🗓','Resumo do mês')+it('planejar','✂️','Planejar corte')+it('oficinas','🏭','Oficinas')+(D.tecido?it('tecido','🧵','Tecido'):'')+(dono&&D.pagamento?it('pagamento','💰','Pagamento',ab?'R$':''):'')+it('relatorio','📄','Relatório PDF')+it('etiquetas','🏷','Etiquetas QR')+(dono?it('usuarios','👥','Pessoas e PINs')+it('historico','🕘','Histórico'):'')+
   `<button class="mi" onclick="sair()"><i>🚪</i><b>Sair</b></button></div>`;
   return h;
 }
