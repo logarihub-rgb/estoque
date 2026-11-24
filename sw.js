@@ -1,4 +1,4 @@
-const C='estoque-v5';
+const C='estoque-v6';
 const ARQ=['./','index.html','manifest.json','icon-192.png','icon-512.png'];
 const FONTES=/fonts\.(googleapis|gstatic)\.com/;
 self.addEventListener('install',e=>{e.waitUntil(caches.open(C).then(c=>c.addAll(ARQ)));self.skipWaiting()});
@@ -16,3 +16,10 @@ self.addEventListener('fetch',e=>{
     return rede;
   }));
 });
+// avisos das 8h e 10h: o servidor só "cutuca"; aqui o app busca o resumo e mostra
+self.addEventListener('push',e=>{e.waitUntil((async()=>{
+  let t='Estoque LOGARI',b='Toque para ver o que falta hoje.';
+  try{const c=await caches.open('est-cfg'),r=await c.match('cfg');if(r){const{api,pin}=await r.json();const j=await(await fetch(api,{method:'POST',body:JSON.stringify({pin,action:'aviso',p:{}})})).json();if(j.ok&&j.aviso){t=j.aviso.t;b=j.aviso.b}}}catch(x){}
+  await self.registration.showNotification(t,{body:b,icon:'icon-192.png',badge:'icon-192.png',tag:'aviso',renotify:true});
+})())});
+self.addEventListener('notificationclick',e=>{e.notification.close();e.waitUntil(clients.matchAll({type:'window',includeUncontrolled:true}).then(l=>{for(const c of l)if('focus' in c)return c.focus();return clients.openWindow('./')}))});
