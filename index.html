@@ -206,7 +206,7 @@ nav button{position:relative}nav .bdg{position:absolute;top:4px;left:calc(50% + 
 .cbar .sg{display:flex;gap:6px;overflow-x:auto;margin-bottom:8px}.cbar .sg button{flex:none;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:16px;padding:6px 11px;font:inherit;font-size:12.5px}
 .sw{width:42px;height:24px;border-radius:12px;background:#2a2620;border:1px solid var(--line);position:relative;flex:none;transition:.2s}.sw i{position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:var(--mut);transition:.2s}.sw.on{background:#3c5a2a;border-color:#4f7a36}.sw.on i{left:20px;background:#e8f3dc}
 .pills.hrs{display:grid;grid-template-columns:repeat(6,1fr)}.pills.hrs button{padding:7px 0}
-.cbar form{display:flex;gap:8px;max-width:640px;margin:0 auto}.cbar input{flex:1;border-radius:22px;padding:11px 16px}.cbar form button{border:0;border-radius:22px;background:var(--acc);color:var(--acc-ink);font:inherit;font-weight:700;padding:0 16px}
+.cbar form{display:flex;gap:8px;max-width:640px;margin:0 auto}.cbar input{flex:1;border-radius:22px;padding:11px 16px}.cbar form button{border:0;border-radius:22px;background:var(--acc);color:var(--acc-ink);font:inherit;font-weight:700;padding:0 16px}.cbar form button.mic{background:#2a2620;border:1px solid var(--line);font-size:18px;padding:0 13px}.cbar form button.mic.on{background:#8a2c1f;border-color:#c0392b;animation:pulso 1s infinite}@keyframes pulso{50%{opacity:.55}}.msg.bot{cursor:pointer}
 </style>
 </head>
 <body>
@@ -415,15 +415,30 @@ function sugestoes(){return ['O que falta?','Alertas','Próximo corte','Vendas d
 function vAssist(){chLoad();
   let h='<div class="chat" id="chat">';
   if(!CH.length)h+=`<div class="msg bot"><h4>Assistente do estoque</h4>Pergunte do seu jeito. Exemplos:<br>• <b>quanto tem de malta preto r1</b><br>• <b>o que falta</b> ou <b>o que falta de mulc</b><br>• <b>próximo corte</b><br>• <b>vendas de ontem</b>, <b>vendas 15 dias de ret</b><br>• <b>lotes na oficina</b>${D.user.dono?'<br>• <b>quanto devo às oficinas</b>':''}</div>`;
-  h+=CH.map(m=>`<div class="msg ${m.eu?'eu':'bot'}">${m.eu?esc(m.t):m.h}</div>`).join('')+'</div>';
-  h+=`<div class="cbar"><div class="sg">${sugestoes().map(t=>`<button onclick="pergAssist('${t}')">${t}</button>`).join('')}</div><form onsubmit="event.preventDefault();const i=$('#cq');const v=i.value;i.value='';pergAssist(v)"><input id="cq" placeholder="Pergunte algo…" autocomplete="off" enterkeyhint="send"><button>Enviar</button></form></div>`;
+  h+=CH.map((m,i)=>`<div class="msg ${m.eu?'eu':'bot'}"${m.eu?'':` onclick="if(!event.target.closest('.go,a,button'))falar(CH[${i}].h)" title="Toque para ouvir"`}>${m.eu?esc(m.t):m.h}</div>`).join('')+'</div>';
+  h+=`<div class="cbar"><div class="sg">${sugestoes().map(t=>`<button onclick="pergAssist('${t}')">${t}</button>`).join('')}</div><form onsubmit="event.preventDefault();const i=$('#cq');const v=i.value;i.value='';pergAssist(v)"><input id="cq" placeholder="Pergunte ou toque no 🎤" autocomplete="off" enterkeyhint="send"><button type="button" id="mic" class="mic" onclick="ouvir()" aria-label="Falar">🎤</button><button>Enviar</button></form></div>`;
   return h;
 }
 function fimChat(){requestAnimationFrame(()=>window.scrollTo(0,document.body.scrollHeight))}
+
+// ---------- VOZ NO ASSISTENTE: fala a pergunta, ouve a resposta ----------
+let REC=null,VOZ=false;
+function textoFala(h){const d=document.createElement('div');d.innerHTML=h;d.querySelectorAll('.ln').forEach(l=>{const s=l.querySelectorAll(':scope>span');l.textContent=(s[0]?s[0].innerText:'')+(s[1]&&s[1].innerText.trim()?': '+s[1].innerText:'')+'. '});d.querySelectorAll('h4,br,div').forEach(x=>x.after('. '));
+  return d.innerText.replace(/R\$\s?/g,'').replace(/(\d)\.(\d{3})/g,'$1$2').replace(/\s*·\s*/g,', ').replace(/[›•✅⚠️🔴🟡🟢]/gu,'').replace(/(\.\s*)+/g,'. ').replace(/\s+/g,' ').trim().slice(0,700)}
+function falar(h){try{const s=window.speechSynthesis;if(!s)return;s.cancel();const u=new SpeechSynthesisUtterance(textoFala(h));u.lang='pt-BR';u.rate=1.05;const v=s.getVoices().find(x=>/pt[-_]BR/i.test(x.lang));if(v)u.voice=v;s.speak(u)}catch(e){}}
+function ouvir(){const SR=window.SpeechRecognition||window.webkitSpeechRecognition,b=$('#mic');
+  try{speechSynthesis.cancel()}catch(e){}
+  if(REC){REC.stop();return}
+  if(!SR)return toast('Este celular não reconhece voz aqui. Use o microfone do teclado.');
+  const r=REC=new SR();r.lang='pt-BR';r.interimResults=true;r.maxAlternatives=1;let txt='';
+  r.onresult=e=>{txt=[...e.results].map(x=>x[0].transcript).join(' ');$('#cq').value=txt};
+  r.onerror=e=>{if(e.error==='not-allowed')toast('Libere o microfone para o app nas configurações');else if(e.error!=='no-speech'&&e.error!=='aborted')toast('Não entendi o áudio, tente de novo')};
+  r.onend=()=>{REC=null;if(b)b.classList.remove('on');const t=txt.trim();if(t){$('#cq').value='';VOZ=true;pergAssist(t)}};
+  if(b)b.classList.add('on');r.start()}
 function pergAssist(t){t=String(t||'').trim();if(!t)return;chLoad();
   if(/^limpar( conversa)?$/i.test(t)){CH=[];chSave();render();return}
   let r;try{r=responde(t)}catch(e){r='Não consegui montar a resposta ('+esc(e.message)+').'}
-  CH.push({eu:1,t});CH.push({h:r});chSave();render()}
+  CH.push({eu:1,t});CH.push({h:r});chSave();render();if(VOZ){VOZ=false;falar(r)}}
 const lnA=(a,b,go)=>`<div class="ln${go?' go':''}"${go?` onclick="${go}"`:''}><span>${a}</span><span style="text-align:right;white-space:nowrap">${b||''}</span></div>`;
 const nomeX=x=>`<span class="dot" style="background:${COR_HEX[x.cor]||'#888'};width:9px;height:9px"></span> ${esc(x.modelo)} ${tamCurto(x.tam)} ${esc(x.cor)}`;
 function achaFiltro(q){
