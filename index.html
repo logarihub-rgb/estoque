@@ -537,7 +537,7 @@ function vProducao(){
     h+=`<div class="card ${l.pend?'pend':''}"><div class="row sp"><b style="font:800 22px var(--serif);color:var(--acc)">${esc(l.lote)}</b><span class="pill ${/conclu|ok|✅/i.test(l.situacao)?'ok':'pe'}">${esc(l.situacao||'—')}</span></div>
     <div class="mut" style="font-size:13px">Corte ${dbr(l.data)} · risco ${n1(l.risco)} m${l.mkg?' · '+n1(l.mkg)+' m/kg':''}</div>
     <div class="prog"><i style="width:${pct}%"></i></div>
-    <div class="row sp" style="font-size:13px"><span>${n0(ch)} de ${n0(l.totalCortadas)} peças chegaram</span><b style="color:${l.falta?'var(--warn)':'var(--ok)'}">falta ${n0(l.falta)}</b></div>${PX[l.lote]?`
+    <div class="row sp" style="font-size:13px"><span>${n0(ch)} de ${n0(l.totalCortadas)} peças chegaram</span><b style="color:${l.falta?'var(--warn)':'var(--ok)'}">falta ${n0(l.falta)}</b></div>${l.pend?'':etapasHTML(l)}${PX[l.lote]?`
     <table style="margin-top:8px"><tr><th></th>${CORES.map(c=>`<th><span class="dot" style="background:${COR_HEX[c]}"></span></th>`).join('')}</tr>
     <tr><td>Rolos</td>${CORES.map(c=>`<td>${n0(l.rolos[c])}</td>`).join('')}</tr>
     <tr><td>Folhas</td>${CORES.map(c=>`<td>${n0(l.folhas[c])}</td>`).join('')}</tr>
@@ -551,6 +551,44 @@ function vProducao(){
   }
   return h;
 }
+
+// ---------- ETAPAS DO LOTE: corte → oficina → entrega → fechado ----------
+const ETP=()=>D.etapas||{real:{},envios:{}};
+const TAMF=t=>t==='R1'?'R1 (P/M)':'R3 (G)';
+function etapaLote(l){const env=(ETP().envios[l.lote]||[]),E=D.entregas.itens.filter(e=>e.lote===l.lote),tot=l.totalCortadas||0;
+  const enviado=env.reduce((s,x)=>s+x.pecas,0),chegou=E.reduce((s,e)=>s+(e.boas||0)+(e.defeito||0),0),def=E.reduce((s,e)=>s+(e.defeito||0),0);
+  const ofs={};env.forEach(x=>{const o=ofs[x.oficina]=ofs[x.oficina]||{env:0,che:0,ult:x.data};o.env+=x.pecas;if(x.data>o.ult)o.ult=x.data});
+  E.forEach(e=>{const k=e.oficina||(env.length===1?env[0].oficina:'(sem oficina)');const o=ofs[k]=ofs[k]||{env:0,che:0,ult:e.data};o.che+=(e.boas||0)+(e.defeito||0);if(e.data>o.ult)o.ult=e.data});
+  const fechado=/encerr/i.test(l.situacao||'')||(tot>0&&l.falta===0);
+  const est=fechado?4:chegou>0?3:enviado>0?2:tot>0?1:0;
+  const datas=[l.data,env.map(x=>x.data).sort()[0],E.map(e=>e.data).sort().slice(-1)[0]];
+  return{env,E,tot,enviado,faltaEnviar:Math.max(0,tot-enviado),chegou,def,ofs,est,real:!!(ETP().real[l.lote]||[]).length,ult:[...datas].filter(Boolean).sort().slice(-1)[0]};}
+function etapasHTML(l){const t=etapaLote(l),st=[['✂️','Cortado',dbr(l.data)],['🚚','Oficina',t.enviado?n0(t.enviado)+' pç':'—'],['📦','Chegando',t.chegou?n0(t.chegou)+' pç':'—'],['✔','Fechado','']];
+  const parado=t.ult&&t.est<4?difDias(hoje(),t.ult):0;
+  let h=`<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin:10px 0 4px">${st.map((s,i)=>{const on=t.est>=i+1,cur=t.est===i+1&&t.est<4;return `<div style="text-align:center;padding:6px 2px;border-radius:6px;border:1px solid ${cur?'var(--acc)':'var(--line)'};background:${on?'#1d1a14':'transparent'};opacity:${on||cur?1:.45}"><div style="font-size:15px">${s[0]}</div><div style="font-size:11px;font-weight:700">${s[1]}</div><div class="mut" style="font-size:10.5px">${on?s[2]:''}</div></div>`}).join('')}</div>`;
+  h+=`<div class="mut" style="font-size:12px">${t.real?'Contagem real do corte':'Peças pelo risco (folhas × encaixe)'}${t.est<4&&parado>=3?` · <span style="color:var(--warn)">parado há ${parado} dias</span>`:''}${t.def?` · <span style="color:var(--bad)">${n0(t.def)} defeito</span>`:''}</div>`;
+  const O=Object.entries(t.ofs);if(O.length)h+=`<div style="margin-top:6px">${O.map(([n,o])=>`<div class="row sp" style="font-size:13px;margin:3px 0"><span>🏭 ${esc(n)}</span><span>${n0(o.env)} enviadas · ${n0(o.che)} chegaram${o.env>o.che?` · <b style="color:var(--warn)">faltam ${n0(o.env-o.che)}</b>`:''}</span></div>`).join('')}</div>`;
+  if(t.est<4)h+=`<div class="grid2" style="margin-top:8px">${t.faltaEnviar>0?`<button class="btn sec" style="margin:0" onclick="fEnvio('${esc(l.lote)}')">🚚 Enviar p/ oficina${t.enviado?` (${n0(t.faltaEnviar)})`:''}</button>`:'<span></span>'}<button class="btn sec" style="margin:0" onclick="fReal('${esc(l.lote)}')">✂️ Contagem real</button></div>`;
+  return h}
+function fEnvio(lote){const l=D.producao.lotes.find(x=>x.lote===lote),t=etapaLote(l),ofs=D.entregas.oficinas||[];
+  open_(`<h2>Enviar ${esc(lote)} para a oficina</h2><div class="grid2"><div><label>Data</label><input id="vdata" type="date" value="${hoje()}"></div><div><label>Peças</label><input id="vpc" inputmode="numeric" value="${t.faltaEnviar||''}"></div></div>
+  <label>Oficina</label>${ofs.length?`<select id="vofi">${ofs.map(o=>`<option>${esc(o)}</option>`).join('')}</select>`:'<input id="vofi" placeholder="ex: Vladimir">'}
+  <div class="mut" style="font-size:12px;margin-top:6px">${n0(t.tot)} peças cortadas · ${n0(t.enviado)} já enviadas. Se dividir entre oficinas, lance um envio para cada uma.</div>
+  <label>Observação</label><input id="vobs"><button class="btn" onclick="sEnvio('${esc(lote)}')">Salvar envio</button>`)}
+function sEnvio(lote){const P={lote,data:val('vdata'),oficina:val('vofi'),pecas:Math.round(num(val('vpc'))),obs:val('vobs')};if(!P.pecas)return toast('Informe as peças');if(!P.oficina)return toast('Escolha a oficina');
+  acao('novoEnvio',P,()=>{const e=(D.etapas=D.etapas||{real:{},envios:{}});(e.envios[lote]=e.envios[lote]||[]).push({linha:0,data:P.data,oficina:P.oficina,pecas:P.pecas})})}
+// grade de contagem real: linhas = modelo/tamanho do encaixe, colunas = cores com folhas
+function gradeReal(enc,folhas,ex){const L=Object.keys(enc).filter(k=>enc[k]),C=CORES.filter(c=>folhas[c]);if(!L.length||!C.length)return '<p class="mut" style="font-size:12px">Preencha encaixe e folhas primeiro.</p>';
+  const v=(k,c)=>{const [m,t]=k.split(' ');const r=(ex||[]).find(x=>x.modelo===m&&x.tam===TAMF(t)&&x.cor===c);return r?r.qtd:Math.round((folhas[c]||0)*(enc[k]||0))};
+  return `<table class="rq"><tr><th></th>${C.map(c=>`<th><span class="dot" style="background:${COR_HEX[c]}"></span></th>`).join('')}</tr>${L.map(k=>`<tr><td style="white-space:nowrap;font-size:12.5px">${esc(k)}</td>${C.map(c=>`<td><input class="rqi" data-k="${esc(k)}" data-c="${c}" inputmode="numeric" value="${v(k,c)}" style="padding:7px 4px;text-align:center;font-size:14px"></td>`).join('')}</tr>`).join('')}</table>
+  <div class="mut" style="font-size:12px;margin-top:4px">Já vem com o cálculo (folhas × encaixe). Troque pelo que contou de verdade.</div>`}
+function leReal(){return [...document.querySelectorAll('.rqi')].map(i=>{const [m,t]=i.dataset.k.split(' ');return{modelo:m,tam:TAMF(t),cor:i.dataset.c,qtd:Math.round(num(i.value))}}).filter(x=>x.qtd>0)}
+function montaReal(){const enc={},folhas={};['Malta R1','Malta R3','Mulc R1','Mulc R3','Ret R1','Ret R3'].forEach(e=>{const v=num(val('le_'+e.replace(' ','_')));if(v)enc[e]=v});CORES.forEach(c=>folhas[c]=num(val('lf_'+c)));$('#lreal').innerHTML=gradeReal(enc,folhas)}
+function fReal(lote){const l=D.producao.lotes.find(x=>x.lote===lote);
+  open_(`<h2>Contagem real · ${esc(lote)}</h2>${gradeReal(l.encaixe,l.folhas,ETP().real[lote])}<button class="btn" onclick="sReal('${esc(lote)}')">Salvar contagem</button>`)}
+function sReal(lote){const R=leReal();if(!R.length)return toast('Informe as peças');
+  acao('corteReal',{lote,real:R},()=>{const e=(D.etapas=D.etapas||{real:{},envios:{}});e.real[lote]=R;const l=D.producao.lotes.find(x=>x.lote===lote);if(l){l.totalCortadas=R.reduce((s,x)=>s+x.qtd,0)}})}
+function marcaDesc(){const R={};CORES.forEach(c=>R[c]=0);document.querySelectorAll('.ldesc:checked').forEach(i=>{const x=(D.descanso||[]).find(y=>y.linha===+i.value);if(x)CORES.forEach(c=>R[c]+=+x.rolos[c]||0)});CORES.forEach(c=>{$('#lr_'+c).value=R[c]||''})}
 function proxLote(){const ns=D.producao.lotes.map(l=>+(/^P(\d+)$/i.exec(l.lote)||[0,0])[1]);return 'P'+((Math.max(0,...ns))+1)}
 function fLote(){
   const enc=['Malta R1','Malta R3','Mulc R1','Mulc R3','Ret R1','Ret R3'];
@@ -559,10 +597,12 @@ function fLote(){
   <div class="grid2"><div><label>Lote</label><input id="llote" value="${proxLote()}"></div><div><label>Data</label><input id="ldata" type="date" value="${hoje()}"></div></div>
   <label>Comprimento do risco (m)</label><input id="lrisco" inputmode="decimal" placeholder="ex: 9,43">
   <div class="k" style="margin-top:14px">Encaixe no risco (vezes)</div><div class="n6">${enc.map(e=>box('le_'+e.replace(' ','_'),e)).join('')}</div>
+  ${(D.descanso||[]).some(x=>x.sit==='Descansando')?`<div class="k" style="margin-top:14px">Rolos que estavam descansando</div>${(D.descanso||[]).filter(x=>x.sit==='Descansando'&&x.linha).map(x=>`<label class="check" style="margin-top:6px;font-size:14px"><input type="checkbox" class="ldesc" value="${x.linha}" onchange="marcaDesc()"> ${esc(MODN[x.modelo]||x.modelo)} · ${dbr(x.data)} · ${CORES.filter(c=>+x.rolos[c]).map(c=>c+' '+x.rolos[c]).join(', ')}</label>`).join('')}`:''}
   <div class="k" style="margin-top:14px">Rolos por cor</div><div class="n4">${CORES.map(c=>box('lr_'+c,c)).join('')}</div>
   <div class="k" style="margin-top:14px">Folhas enfestadas por cor</div><div class="n4">${CORES.map(c=>box('lf_'+c,c)).join('')}</div>
   <div class="grid2" style="margin-top:6px"><div><label>Kg total (opcional)</label><input id="lkg" inputmode="decimal"></div>${D.user.dono?`<div><label>Valor tecido R$ (opcional)</label><input id="lval" inputmode="decimal"></div>`:''}</div>
-  <p class="mut" style="font-size:12px">As peças cortadas, metros e custo a planilha calcula sozinha.</p>
+  <div class="k" style="margin-top:14px">Peças cortadas · contagem real</div><div id="lreal"><button class="btn sec" style="margin:4px 0 0" onclick="montaReal()">Contar por cor e tamanho</button></div>
+  <p class="mut" style="font-size:12px">Se não lançar a contagem, a planilha calcula pelas folhas × encaixe. Metros e custo ela calcula sozinha.</p>
   <button class="btn" onclick="sLote()">Salvar lote</button>`);
 }
 function sLote(){
@@ -572,7 +612,8 @@ function sLote(){
   if(!Object.keys(enc).length)return toast('Informe o encaixe no risco');
   if(!Object.values(rolos).some(Boolean))return toast('Informe os rolos');
   const P={lote:val('llote').trim(),data:val('ldata'),risco:num(val('lrisco')),encaixe:enc,rolos,folhas,kg:num(val('lkg')),valorTecido:$('#lval')?num(val('lval')):0};
-  acao('novoLote',P,()=>D.producao.lotes.push({lote:P.lote,data:P.data,risco:P.risco,encaixe:enc,rolos,folhas,cortadas:{},totalCortadas:0,falta:0,situacao:'salvando…',pend:true}));
+  P.real=leReal();P.descanso=[...document.querySelectorAll('.ldesc:checked')].map(i=>+i.value);
+  acao('novoLote',P,()=>{(P.descanso||[]).forEach(n=>{const x=(D.descanso||[]).find(y=>y.linha===n);if(x){x.sit='Cortado';x.fim=hoje()}});D.producao.lotes.push({lote:P.lote,data:P.data,risco:P.risco,encaixe:enc,rolos,folhas,cortadas:{},totalCortadas:0,falta:0,situacao:'salvando…',pend:true})});
 }
 
 /* ---------- ENTREGAS ---------- */
