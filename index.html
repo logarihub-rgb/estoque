@@ -224,9 +224,8 @@ nav button{position:relative}nav .bdg{position:absolute;top:4px;left:calc(50% + 
   <nav>
     <button data-t="painel" onclick="ir('painel')"><svg viewBox="0 0 24 24"><path d="M3 13h8V3H3zM13 21h8V11h-8zM3 21h8v-6H3zM13 3v6h8V3z"/></svg>Painel</button>
     <button data-t="estoque" onclick="ir('estoque')"><svg viewBox="0 0 24 24"><path d="M3 7l9-4 9 4-9 4zM3 7v10l9 4 9-4V7M12 11v10"/></svg>Estoque</button>
-    <button data-t="producao" onclick="ir('producao')"><svg viewBox="0 0 24 24"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4L8.1 15.9M14.5 14.5L20 20M8.1 8.1L12 12"/></svg>Produção</button>
     <button data-t="assist" onclick="ir('assist')"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/><path d="M8 10h.01M12 10h.01M16 10h.01"/></svg>Assistente</button>
-    <button data-t="entregas" onclick="ir('entregas')"><svg viewBox="0 0 24 24"><path d="M3 7h12v10H3zM15 10h4l2 3v4h-6M7 20a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM17 20a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"/></svg>Entregas</button>
+    <button data-t="entregas" onclick="ir('entregas')"><svg viewBox="0 0 24 24"><path d="M3 7h12v10H3zM15 10h4l2 3v4h-6M7 20a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM17 20a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"/></svg>Entradas</button>
     <button data-t="mais" onclick="ir('mais')"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg>Mais<span id="bdg"></span></button>
   </nav>
 </div>
@@ -281,6 +280,7 @@ async function processaFila(){
 function acao(a,p,otimista){const f=fila();f.push({a,p,t:Date.now()});setFila(f);close_();if(otimista)otimista();toast('Salvando…');render();processaFila()}
 function vFila(){const f=fila();if(!f.length)return'';const err=f.find(x=>x.erro);return`<div class="fila"><span>${f.length} lançamento${f.length>1?'s':''} ${err?'não enviado — '+esc(err.erro):'sendo salvo…'}</span>${err?`<span><button onclick="processaFila()">Tentar de novo</button> <button style="background:none;color:#f0b48a;border:1px solid #6a2f20" onclick="pergunta('Descartar os lançamentos pendentes?','Descartar',true).then(ok=>{if(ok){setFila([]);carregar(true)}})">Descartar</button></span>`:''}</div>`}
 function ir(t){TAB=t;window.scrollTo(0,0);render()}
+function abreProd(t){location.href='../producao-logari/'+(t?'#'+t:'')}
 const VIEWS={descanso:()=>vDescanso(),avisos:()=>vAvisos(),assist:()=>vAssist(),planejar:()=>vPlanejar(),oficinas:()=>vOficinas(),tecido:()=>vTecido(),relatorio:()=>vRelatorio(),etiquetas:()=>vEtiquetas(),usuarios:()=>vUsuarios(),historico:()=>vHistorico(),recibo:()=>vRecibo(),painel:()=>vPainel(),estoque:()=>vEstoque(),producao:()=>vProducao(),entregas:()=>vEntregas(),mais:()=>vMais(),alertas:()=>vAlertas(),vendas:()=>vVendas(),resumo:()=>vResumo(),pagamento:()=>vPagamento()};
 const NAVOF={descanso:'mais',avisos:'mais',planejar:'mais',oficinas:'mais',tecido:'mais',relatorio:'mais',etiquetas:'mais',usuarios:'mais',historico:'mais',recibo:'mais',alertas:'mais',vendas:'mais',resumo:'mais',pagamento:'mais'};
 function render(){if(!D)return;const nt=NAVOF[TAB]||TAB;document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.t===nt));
@@ -335,7 +335,6 @@ function vPainel(){
   const urg=A.filter(ehFalta).sort((a,b)=>(a.dias??-1)-(b.dias??-1));
   h+=`<div class="sec-t"><span>O que fazer agora</span>${urg.length>5?`<button onclick="ir('alertas')">Ver todos (${urg.length}) ›</button>`:''}</div>`;
   h+=urg.length?urg.slice(0,5).map(x=>{const k=stk(x.status);return `<button class="todo" onclick="detSku('${x.sku}')"><span class="ic s-${k}">${n0(x.estoque)}</span><span class="tx"><b>${esc(x.modelo)} ${tamCurto(x.tam)} · ${esc(x.cor)}</b><small>${k==='ZERADO'?(x.producao?n0(x.producao)+' na oficina — cobrar entrega':'zerado, nada na oficina'):(x.dias==null?'—':n0(x.dias)+' dias de estoque')}${x.sugestao?' · produzir '+n0(x.sugestao):''}</small></span><span class="ar">›</span></button>`}).join(''):'<div class="todo"><span class="ic s-OK">✓</span><span class="tx"><b>Tudo em dia</b><small>Nenhum SKU faltando</small></span></div>';
-  if(dono&&D.pagamento){const ab=pagAberto();if(ab)h+=`<button class="todo" onclick="ir('pagamento')"><span class="ic s-ATENCAO">R$</span><span class="tx"><b>Pagar oficinas: ${brl(ab)}</b><small>Toque para ver e marcar como pago</small></span><span class="ar">›</span></button>`}
   // vendas 7 dias
   const p=vendasPer(7),ant=vendasRange(addDias(p.ini,-7),addDias(p.ini,-1)),ta=soma(ant,r=>r[2]),vr=ta?(p.tot/ta-1)*100:null;
   const by={};p.L.forEach(r=>by[r[0]]=(by[r[0]]||0)+r[2]);const dias=[];for(let d=p.ini;d<=p.fim;d=addDias(d,1))dias.push(d);const mx=Math.max(1,...dias.map(d=>by[d]||0));
@@ -345,10 +344,10 @@ function vPainel(){
   // cobertura por modelo
   const mods={};A.forEach(x=>{const m=mods[x.modelo]=mods[x.modelo]||{e:0,m:0};m.e+=x.estoque;m.m+=x.media});
   const lm=Object.entries(mods).map(([k,v])=>({k,e:v.e,d:v.m?v.e/v.m:null})).sort((a,b)=>(a.d??999)-(b.d??999));
-  h+=`<div class="sec-t"><span>Cobertura por modelo</span><button onclick="ir('planejar')">Planejar corte ›</button></div><div class="card">${lm.map(o=>`<div class="cm" onclick="FMOD='${esc(o.k)}';FS='Todos';ir('estoque')"><b>${esc(o.k)}</b><div class="t"><i style="width:${o.d==null?0:Math.min(100,o.d/30*100)}%;background:${corDias(o.d)}"></i></div><span class="d" style="color:${corDias(o.d)}">${o.d==null?'—':n0(o.d)+'d'}</span></div>`).join('')}</div>`;
+  h+=`<div class="sec-t"><span>Cobertura por modelo</span><button onclick="abreProd('planejar')">Planejar corte ›</button></div><div class="card">${lm.map(o=>`<div class="cm" onclick="FMOD='${esc(o.k)}';FS='Todos';ir('estoque')"><b>${esc(o.k)}</b><div class="t"><i style="width:${o.d==null?0:Math.min(100,o.d/30*100)}%;background:${corDias(o.d)}"></i></div><span class="d" style="color:${corDias(o.d)}">${o.d==null?'—':n0(o.d)+'d'}</span></div>`).join('')}</div>`;
   const pir=D.estoque.filter(x=>x.piranha),cfg=D.config||{};let prox='';if(cfg.ultimaPiranha&&cfg.cicloPiranha)prox=dbr(addDias(cfg.ultimaPiranha,cfg.cicloPiranha));
   h+=`<button class="todo" style="margin-top:10px" onclick="detPiranha()"><span class="ic" style="background:#16222a">🐟</span><span class="tx"><b>Piranha</b><small>${pir.length?pir.map(x=>esc(x.modelo)+' '+tamCurto(x.tam)+' '+esc(x.cor)).join(', '):'nenhuma'}${prox?' · troca '+prox:''}</small></span><span class="ar">›</span></button>`;
-  h+=`<div class="qa"><button onclick="ir('entregas');setTimeout(fEntrega,0)"><i>🚚</i>Lançar entrega</button><button onclick="ir('producao');setTimeout(fLote,0)"><i>✂️</i>Novo lote</button><button onclick="ir('assist')"><i>💬</i>Assistente</button></div>`;
+  h+=`<div class="qa"><button onclick="abreProd('entregas')"><i>🚚</i>Lançar entrega</button><button onclick="abreProd('producao')"><i>✂️</i>Produção</button><button onclick="ir('assist')"><i>💬</i>Assistente</button></div>`;
   return h;
 }
 
@@ -466,7 +465,7 @@ function responde(t){
   // pagamento
   if(/devo|pagar|pagamento|paguei/.test(q)){
     if(!dono||!D.pagamento)return 'Pagamento só aparece para o dono.';
-    const L=[];D.pagamento.forEach((b,i)=>b.oficinas.forEach(o=>{if(!o.pago&&o.apagar)L.push(lnA(`${esc(o.oficina)} · ${esc(b.periodo)}`,`<b>${brl(o.apagar)}</b>`,`ir('pagamento')`))}));
+    const L=[];D.pagamento.forEach((b,i)=>b.oficinas.forEach(o=>{if(!o.pago&&o.apagar)L.push(lnA(`${esc(o.oficina)} · ${esc(b.periodo)}`,`<b>${brl(o.apagar)}</b>`,`abreProd('pagamento')`))}));
     return L.length?`<h4>Falta pagar ${brl(pagAberto())}</h4>`+L.join('')+'<div class="mut" style="font-size:12px;margin-top:6px">Toque numa linha para abrir o Pagamento.</div>':'Nada em aberto com as oficinas. ✅';
   }
   // corte
@@ -477,13 +476,13 @@ function responde(t){
     h+='<div style="margin-top:8px"></div>'+G.sort((a,b)=>soma(Object.values(b.cores),v=>v)-soma(Object.values(a.cores),v=>v)).map(o=>lnA(esc(o.nome),CORES.filter(c=>o.cores[c]).map(c=>`${c[0]} ${n0(o.cores[c])}`).join(' · '))).join('');
     const falt=C.filter(c=>c.tec&&c.tec.rolos!=null&&c.tec.rolos<c.rolos);
     if(falt.length)h+=`<div style="color:#ff8a65;font-size:12.5px;margin-top:6px">Comprar tecido: ${falt.map(c=>`${c.rolos-c.tec.rolos} ${esc(c.tec.nome)}`).join(', ')}</div>`;
-    return h+`<div class="mut" style="font-size:12px;margin-top:6px">Já desconta estoque e o que está na oficina. <a style="color:var(--acc)" onclick="ir('planejar')">Abrir Planejar corte ›</a></div>`;
+    return h+`<div class="mut" style="font-size:12px;margin-top:6px">Já desconta estoque e o que está na oficina. <a style="color:var(--acc)" onclick="abreProd('planejar')">Abrir Planejar corte ›</a></div>`;
   }
   // lotes / oficina
   if(/lote|oficina|costura|vladimir/.test(q)){
     const L=D.producao.lotes.filter(l=>!l.pend&&l.falta>0);
     if(!L.length)return 'Nenhum lote em aberto na oficina.';
-    return `<h4>${L.length} lote${L.length>1?'s':''} na oficina</h4>`+L.map(l=>lnA(`Lote ${esc(l.lote)} <span class="mut">${l.data?dbr(l.data)+' · '+difDias(hoje(),l.data)+' dias':''}</span>`,`falta <b>${n0(l.falta)}</b> de ${n0(l.totalCortadas)}`,`ir('producao')`)).join('');
+    return `<h4>${L.length} lote${L.length>1?'s':''} na oficina</h4>`+L.map(l=>lnA(`Lote ${esc(l.lote)} <span class="mut">${l.data?dbr(l.data)+' · '+difDias(hoje(),l.data)+' dias':''}</span>`,`falta <b>${n0(l.falta)}</b> de ${n0(l.totalCortadas)}`,`abreProd('producao')`)).join('');
   }
   if(/piranha/.test(q)){const pir=D.estoque.filter(x=>x.piranha);
     return '<h4>🐟 Piranha</h4>'+(pir.length?pir.map(x=>lnA(nomeX(x),`${n0(x.estoque)} est.`)).join(''):'Nenhuma marcada.')+'<div class="mut" style="font-size:12px;margin:8px 0 2px">Sugestão para a próxima troca:</div>'+sugerePiranha().map(x=>lnA(nomeX(x),`${n0(x.estoque)} est. · ${n1(x.media)}/dia`)).join('');}
@@ -634,7 +633,7 @@ function sLote(){
 /* ---------- ENTREGAS ---------- */
 function vEntregas(){
   const E=D.entregas.itens,dono=D.user.dono;
-  let h=`<button class="btn" style="margin:0 0 12px" onclick="fEntrega()">+ Lançar entrega da oficina</button>`;
+  let h=`<button class="btn sec" style="margin:0 0 12px" onclick="abreProd('entregas')">Lançar entrega no app Produção ↗</button>`;
   const by={};E.forEach(e=>{(by[e.data]=by[e.data]||[]).push(e)});
   Object.keys(by).sort().reverse().slice(0,20).forEach(d=>{
     const L=by[d],tb=L.reduce((s,e)=>s+e.boas,0),td=L.reduce((s,e)=>s+e.defeito,0);
@@ -682,7 +681,7 @@ async function sEntrega(){
 function vMais(){
   const A=alertas(),urg=A.filter(a=>a.n>=3).length,dono=D.user.dono,ab=dono&&D.pagamento?pagAberto():0;
   const it=(t,ic,nome,bd)=>`<button class="mi" onclick="ir('${t}')">${bd?`<span class="bd">${bd}</span>`:''}<i>${ic}</i><b>${nome}</b></button>`;
-  let h='<div class="mg">'+it('alertas','⚠️','Alertas',urg)+it('avisos','🔔','Avisos')+it('vendas','📈','Vendas')+it('resumo','🗓','Resumo do mês')+it('planejar','✂️','Planejar corte')+it('descanso','⏳','Descansando',(D.descanso||[]).filter(x=>x.sit==='Descansando').length||'')+it('oficinas','🏭','Oficinas')+(D.tecido?it('tecido','🧵','Tecido'):'')+(dono&&D.pagamento?it('pagamento','💰','Pagamento',ab?'R$':''):'')+it('relatorio','📄','Relatório PDF')+it('etiquetas','🏷','Etiquetas QR')+(dono?it('usuarios','👥','Pessoas e PINs')+it('historico','🕘','Histórico'):'')+
+  let h='<div class="mg">'+it('alertas','⚠️','Alertas',urg)+it('avisos','🔔','Avisos')+it('vendas','📈','Vendas')+it('resumo','🗓','Resumo do mês')+`<button class="mi" onclick="abreProd()"><i>🏭</i><b>App Produção ↗</b></button>`+it('relatorio','📄','Relatório PDF')+it('etiquetas','🏷','Etiquetas QR')+(dono?it('usuarios','👥','Pessoas e PINs')+it('historico','🕘','Histórico'):'')+
   `<button class="mi" onclick="sair()"><i>🚪</i><b>Sair</b></button></div>`;
   return h;
 }
@@ -702,11 +701,11 @@ function alertas(){
   });
   const va=(D.painel||{}).vendasAte;if(va){const m=/(\d{2})\/(\d{2})/.exec(va);if(m){const dv=H.slice(0,4)+'-'+m[2]+'-'+m[1];const atr=difDias(H,dv);if(atr>2)L.push({n:2,t:'Vendas desatualizadas',d:`Última venda lançada em ${m[1]}/${m[2]} (${atr} dias). Rode "Executar estoque".`})}}
   if(cfg.ultimaPiranha&&cfg.cicloPiranha){const px=addDias(cfg.ultimaPiranha,cfg.cicloPiranha),f=difDias(px,H);if(f<=2)L.push({n:f<0?2:1,t:'🐟 Troca da Piranha',d:f<0?`Passou do dia (${dbr(px)})`:f===0?'É hoje':`Em ${f} dia${f>1?'s':''} (${dbr(px)})`})}
-  D.producao.lotes.forEach(l=>{if(l.pend||!l.falta||!l.data)return;const dd=difDias(H,l.data);if(dd>=15)L.push({n:dd>=25?3:2,t:`Lote ${l.lote} há ${dd} dias na oficina`,d:`Ainda faltam ${n0(l.falta)} de ${n0(l.totalCortadas)} peças`,go:"ir('producao')"})});
+  D.producao.lotes.forEach(l=>{if(l.pend||!l.falta||!l.data)return;const dd=difDias(H,l.data);if(dd>=15)L.push({n:dd>=25?3:2,t:`Lote ${l.lote} há ${dd} dias na oficina`,d:`Ainda faltam ${n0(l.falta)} de ${n0(l.totalCortadas)} peças`,go:"abreProd('producao')"})});
   const ini=addDias(H,-7),E=D.entregas.itens.filter(e=>e.data>=ini),b=E.reduce((s,e)=>s+e.boas,0),df=E.reduce((s,e)=>s+e.defeito,0);
   if(b+df>50&&df/(b+df)>0.03)L.push({n:2,t:`Defeito alto: ${n1(df/(b+df)*100)}% na semana`,d:`${n0(df)} com defeito em ${n0(b+df)} peças entregues`,go:"ir('entregas')"});
-  if(dono&&D.pagamento)D.pagamento.forEach(bk=>{const fim=fimSemana(bk);(bk.oficinas||[]).forEach(o=>{if(o.pago||!o.apagar)return;L.push({n:fim&&fim<H?3:1,t:`Pagar ${o.oficina}: ${brl(o.apagar)}`,d:`Semana ${bk.periodo}${fim&&fim<H?' — já fechou':''}`,go:"ir('pagamento')"})});
-    if(bk.tot.faltaconferir&&fim&&fim<H)L.push({n:2,t:`${n0(bk.tot.faltaconferir)} entrega(s) sem conferir`,d:`Semana ${bk.periodo}`,go:"ir('pagamento')"})});
+  if(dono&&D.pagamento)D.pagamento.forEach(bk=>{const fim=fimSemana(bk);(bk.oficinas||[]).forEach(o=>{if(o.pago||!o.apagar)return;L.push({n:fim&&fim<H?3:1,t:`Pagar ${o.oficina}: ${brl(o.apagar)}`,d:`Semana ${bk.periodo}${fim&&fim<H?' — já fechou':''}`,go:"abreProd('pagamento')"})});
+    if(bk.tot.faltaconferir&&fim&&fim<H)L.push({n:2,t:`${n0(bk.tot.faltaconferir)} entrega(s) sem conferir`,d:`Semana ${bk.periodo}`,go:"abreProd('pagamento')"})});
   return L.sort((a,b)=>b.n-a.n);
 }
 function vAlertas(){
